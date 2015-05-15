@@ -1,5 +1,6 @@
 (ns predis.mock
   (:require [clojure.set :as clj.set]
+            [clojure.string :as string]
             (predis
               [core :as core]
               [util :as util])))
@@ -47,6 +48,15 @@
   (core/exists [this k]
     (if (core/get this k) 1 0))
 
+  (core/keys [this pat]
+    (let [re (re-pattern (string/escape pat {\* ".*" \? ".?"}))
+          key-matches
+          (fn [k]
+            (let [match (re-find re k)]
+              ; Bit of hackery to support empty keys (legal!)
+              (not (and (empty? match) (not= match k)))))]
+      (filter key-matches (keys @store))))
+
   (core/randomkey [this]
     (first (shuffle (keys @store))))
 
@@ -62,6 +72,15 @@
         (core/rename this k new-k)
         1)
       0))
+
+  (core/type [this k]
+    (let [x (core/get this k)]
+      (cond
+        (string? x) "string"
+        (set? x) "set"
+        (sequential? x) "list"
+        (associative? x) "hash"
+        :else "none")))
 
   ;; Server
   (core/flushdb [this]
@@ -81,33 +100,43 @@
     (core/decrby this k 1))
 
   (core/decrby [this k decrement]
-    (swap! store update-in [k] (fn [old] (- (or old 0) decrement)))
-    (core/get this k))
+    (let [do-decrby (fn [old]
+                      (->> (- (if old (do (assert (string? old)) (Integer/parseInt old)) 0) decrement)
+                           str))]
+      (swap! store update-in [k] do-decrby)
+      (Integer/parseInt (core/get this k))))
 
   (core/get [this k]
-    (get @store k))
+    (get @store (str k)))
 
   (core/incr [this k]
     (core/incrby this k 1))
 
   (core/incrby [this k increment]
-    (swap! store update-in [k] (fn [old] (+ (or old 0) increment)))
-    (core/get this k))
+    (let [do-incrby (fn [old]
+                      (->> (+ (if old (Integer/parseInt old) 0) increment)
+                           str))]
+    (swap! store update-in [k] do-incrby)
+    (Integer/parseInt (core/get this k))))
 
   (core/incrbyfloat [this k increment]
-    (core/incrby this k increment))
+    (let [do-incrby (fn [old]
+                      (->> (+ (if old (Double/parseDouble old) 0) increment)
+                           str))]
+    (swap! store update-in [k] do-incrby)
+    (core/get this k)))
 
   (core/mget [this ks]
     (util/values-at @store ks))
 
   (core/mset [this kvs]
     (assert (even? (count kvs)) (err-arity "MSET"))
-    (doseq [[k v] (partition 2 kvs)]
+    (doseq [[k v] kvs]
       (core/set this k v))
     "OK")
 
   (core/set [this k v]
-    (swap! store assoc k v)
+    (swap! store assoc (str k) (str v))
     "OK")
 
   (core/setnx [this k v]
@@ -132,7 +161,7 @@
       0))
 
   (core/hexists [this k f]
-    (boolean (core/hget this k f)))
+    (if (core/hget this k f) 1 0))
 
   (core/hget [this k f]
     (let [m (or (core/get this k) {})]
@@ -179,19 +208,22 @@
   (core/lpop [this k]
     (let [vs (core/get this k)]
       (when (seq vs)
-        (let [v (first vs)]
-          (swap! store update-in [k] rest)
+        (let [v (first vs)
+              vs' (rest vs)]
+          (if (seq vs')
+            (swap! store assoc k vs')
+            (swap! store dissoc k))
           v))))
 
   (core/lpush [this k v-or-vs]
     (let [vs' (util/vec-wrap v-or-vs)
           do-push (fn [old-vs new-v] (cons new-v (or old-vs [])))]
       (doseq [v vs']
-        (swap! store update-in [k] do-push v))
+        (swap! store update-in [k] do-push (str v)))
       (core/llen this k)))
 
   (core/lrange [this k start stop]
-    (let [vs (core/get this k)
+    (let [vs (vec (core/get this k))
           last-idx (dec (count vs))
           stop' (normalized-end-idx vs stop)]
       (if (seq vs)
@@ -204,10 +236,11 @@
     (assert (number? cnt) err-badint)
     (let [vs (core/get this k)]
       (if (seq vs)
-        (let [[vs' nremoved] (cond
-                               (> cnt 0) (util/remove-first-n vs cnt v)
-                               (< cnt 0) (util/remove-last-n vs (Math/abs cnt) v)
-                               (= cnt 0) (util/remove-all vs v))]
+        (let [v' (str v)
+              [vs' nremoved] (cond
+                               (> cnt 0) (util/remove-first-n vs cnt v')
+                               (< cnt 0) (util/remove-last-n vs (Math/abs cnt) v')
+                               (= cnt 0) (util/remove-all vs v'))]
           (swap! store assoc k vs')
           nremoved)
         0)))
@@ -215,13 +248,16 @@
   (core/rpop [this k]
     (let [vs (core/get this k)]
       (when (seq vs)
-        (let [v (last vs)]
-          (swap! store update-in [k] (fn [l] (or (butlast l) [])))
+        (let [v (last vs)
+              vs' (butlast vs)]
+          (if (seq vs')
+            (swap! store assoc k vs')
+            (swap! store dissoc k))
           v))))
 
   (core/rpush [this k v-or-vs]
     (let [vs' (util/vec-wrap v-or-vs)
-          do-push (fn [old-vs] (concat (or old-vs []) vs'))]
+          do-push (fn [old-vs] (concat (or old-vs []) (map str vs')))]
       (swap! store update-in [k] do-push)
       (core/llen this k)))
 
@@ -263,7 +299,7 @@
       (core/scard this dest)))
 
   (core/sismember [this k m]
-    (contains? (set-at this k) m))
+    (contains? (set-at this k) (str m)))
 
   (core/smembers [this k]
     (seq (set-at this k)))

@@ -1,13 +1,15 @@
 (ns predis.core
-  (:refer-clojure :exclude [get set type]))
+  (:refer-clojure :exclude [get set keys type]))
 
 (defprotocol IRedis
   ; Keys
   (del [this k-or-ks])
   (exists [this k])
+  (keys [this pat])
   (randomkey [this])
   (rename [this k new-k])
   (renamenx [this k new-k])
+  (type [this k])
 
   ; Server
   (flushdb [this])
