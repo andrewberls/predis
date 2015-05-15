@@ -23,6 +23,21 @@
   (if-let [vs (core/get redis k)]
     (set vs)))
 
+(defn normalized-start-idx
+  "Given an start idx which may be negative (indicating offset from the end)
+   or exceed the size of xs, return a normalized positive 0-based idx
+   See http://redis.io/commands/lrange"
+  [xs start]
+  (let [last-idx (dec (count xs))
+        start' (cond
+                 (> start last-idx) last-idx
+                 (< start 0) (+ (count xs) start)
+                 :else start)]
+    ; TODO
+    (if (and (< start' 0) (> (Math/abs start') last-idx))
+      0
+      start')))
+
 (defn normalized-end-idx
   "Given an end idx which may be negative (indicating offset from the end)
    or exceed the size of xs, return a normalized positive 0-based idx
@@ -171,6 +186,7 @@
     (let [vs (seq (or (core/get this k) []))]
       (or vs [])))
 
+  ; TODO: str
   (core/hincrby [this k f increment]
     (let [do-hincrby (fn [m]
                        (let [old (get m f 0)]
@@ -190,6 +206,7 @@
           fs' (util/vec-wrap f-or-fs)]
       (util/values-at m fs')))
 
+  ; TODO: tuples
   (core/hmset [this k kvs]
     (let [do-merge (fn [m]
                      (->> (concat (seq (or m {})) kvs)
@@ -225,11 +242,13 @@
   (core/lrange [this k start stop]
     (let [vs (vec (core/get this k))
           last-idx (dec (count vs))
-          stop' (normalized-end-idx vs stop)]
+          start' (normalized-start-idx vs start)
+          stop' (normalized-end-idx vs stop)
+          indices (range start' (inc stop'))]
       (if (seq vs)
         (if (> start last-idx)
           []
-          (map (partial get vs) (range start (inc stop'))))
+          (map (partial get vs) indices))
         [])))
 
   (core/lrem [this k cnt v]

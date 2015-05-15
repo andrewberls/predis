@@ -176,17 +176,17 @@
       (is (= (r/lpush mock-client k vs) (r/lpush carmine-client k vs)))
       (dbs-equal mock-client carmine-client))))
 
-;(defspec test-lrange
-;  10
-;  (let [mock-client (mock/->redis)]
-;    (prop/for-all [k gen/string-alphanumeric
-;                   vs (gen/not-empty (gen/vector gen/int))
-;                   start gen/int
-;                   stop gen/int]
-;      (assert-rpush mock-client carmine-client k vs)
-;      (is (= (r/lrange mock-client k start stop)
-;             (r/lrange carmine-client k start stop)))
-;      (dbs-equal mock-client carmine-client))))
+(defspec test-lrange
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))
+                   start gen/int
+                   stop gen/int]
+      (assert-rpush mock-client carmine-client k vs)
+      (is (= (r/lrange mock-client k start stop)
+             (r/lrange carmine-client k start stop)))
+      (dbs-equal mock-client carmine-client))))
 
 ;(defspec test-lrem)
 ;;(defspec test-lset)
