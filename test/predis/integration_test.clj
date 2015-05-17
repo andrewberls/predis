@@ -177,7 +177,7 @@
       (dbs-equal mock-client carmine-client))))
 
 (defspec test-lrange
-  10
+  50
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))

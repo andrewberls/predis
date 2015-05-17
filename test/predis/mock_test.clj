@@ -232,6 +232,8 @@
     (is (= ["1" "2" "3" "4" "5" "6" "7" "8"] (r/lrange redis "foo" 0 100)))
     (is (= [] (r/lrange redis "foo" 100 101)))
     (is (= ["1" "2" "3" "4" "5" "6" "7" "8"] (r/lrange redis "foo" 0 -1)))
+    (is (= ["7" "8"] (r/lrange redis "foo" -2 -1)))
+    (is (= [] (r/lrange redis "foo" -2 -3)))
     (is (= ["1" "2" "3" "4" "5" "6" "7"] (r/lrange redis "foo" 0 -2)))
     (is (= [] (r/lrange redis "fake-key" 0 10)))))
 

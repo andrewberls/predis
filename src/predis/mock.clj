@@ -28,25 +28,23 @@
    or exceed the size of xs, return a normalized positive 0-based idx
    See http://redis.io/commands/lrange"
   [xs start]
-  (let [last-idx (dec (count xs))
-        start' (cond
-                 (> start last-idx) last-idx
-                 (< start 0) (+ (count xs) start)
-                 :else start)]
-    ; TODO
-    (if (and (< start' 0) (> (Math/abs start') last-idx))
-      0
-      start')))
+  (let [len (count xs)
+        last-idx (dec len)]
+    (cond
+      (< start (- len)) 0
+      (< start 0) (+ len start)
+      :else start)))
 
 (defn normalized-end-idx
   "Given an end idx which may be negative (indicating offset from the end)
    or exceed the size of xs, return a normalized positive 0-based idx
    See http://redis.io/commands/lrange"
   [xs end]
-  (let [last-idx (dec (count xs))]
+  (let [len (count xs)
+        last-idx (dec len)]
     (cond
       (> end last-idx) last-idx
-      (< end 0) (+ (count xs) end)
+      (< end 0) (+ len end)
       :else end)))
 
 ;;
