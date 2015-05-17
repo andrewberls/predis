@@ -156,8 +156,8 @@
     (is (= nil (r/hget redis "fake-key" "fake-field")))))
 
 (deftest test-hgetall
-  (let [redis (mock/->redis {"foo" {"bar" 1 "quux" 2}})]
-    (is (= [["bar" 1] ["quux" 2]] (sort (r/hgetall redis "foo"))))
+  (let [redis (mock/->redis {"foo" {"bar" "1" "quux" "2"}})]
+    (is (= ["bar" "1" "quux" "2"] (r/hgetall redis "foo")))
     (is (= [] (r/hgetall redis "fake-key")))))
 
 (deftest test-hincrby
@@ -182,19 +182,32 @@
     (is (= 0 (r/hlen redis "fake-key")))))
 
 (deftest test-hmget
-  (let [redis (mock/->redis {"foo" {"bar" 1 "baz" 2}})]
-    (is (= [1] (r/hmget redis "foo" "bar")))
-    (is (= [1 2] (r/hmget redis "foo" ["bar" "baz"])))
-    (is (= [2 nil] (r/hmget redis "foo" ["baz" "fake"])))
+  (let [redis (mock/->redis {"foo" {"bar" "1" "baz" "2"}})]
+    (is (= ["1"] (r/hmget redis "foo" "bar")))
+    (is (= ["1" "2"] (r/hmget redis "foo" ["bar" "baz"])))
+    (is (= ["2" nil] (r/hmget redis "foo" ["baz" "fake"])))
     (is (= [nil] (r/hmget redis "foo" ["fake"])))
     (is (= [nil] (r/hmget redis "foo" "fake")))))
 
 (deftest test-hmset
-  (let [redis (mock/->redis {"foo" {"bar" 1}})]
-    (r/hmset redis "foo" [["baz" 2]])
-    (is (= {"foo" {"bar" 1 "baz" 2}} @(.store redis)))
-    (r/hmset redis "new-key" [["quux" 3]])
-    (is (= {"foo" {"bar" 1 "baz" 2} "new-key" {"quux" 3}} @(.store redis)))))
+  (let [redis (mock/->redis {"foo" {"bar" "1"}})]
+    (r/hmset redis "foo" [["baz" "2"]])
+    (is (= {"foo" {"bar" "1" "baz" "2"}} @(.store redis)))
+    (r/hmset redis "new-key" [["quux" "3"]])
+    (is (= {"foo" {"bar" "1" "baz" "2"} "new-key" {"quux" "3"}} @(.store redis)))))
+
+(deftest test-hset
+  (let [redis (mock/->redis {"foo" {"bar" "1"}})]
+    (is (= 1 (r/hset redis "foo" "baz" "2")))
+    (is (= {"foo" {"bar" "1" "baz" "2"}} @(.store redis)))
+    (is (= 0 (r/hset redis "foo" "bar" "3")))
+    (is (= {"foo" {"bar" "3" "baz" "2"}} @(.store redis)))))
+
+(deftest test-hsetnx
+  (let [redis (mock/->redis {"foo" {"bar" "1"}})]
+    (is (= 1 (r/hsetnx redis "foo" "baz" "2")))
+    (is (= 0 (r/hsetnx redis "foo" "bar" "3")))
+    (is (= {"foo" {"bar" "1" "baz" "2"}} @(.store redis)))))
 
 (deftest test-hvals
   (let [redis (mock/->redis {"foo" {"quux" 2 "bar" 1}})]

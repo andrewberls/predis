@@ -45,9 +45,8 @@
   (hlen [this k])
   (hmget [this k f-or-fs])
   (hmset [this k kvs])
-  ;(hset [this k f v])
-  ;(hsetnx [this k f v])
-  ;(hstrlen [this k f])
+  (hset [this k f v])
+  (hsetnx [this k f v])
   (hvals [this k])
 
   ; Lists

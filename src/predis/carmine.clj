@@ -117,14 +117,14 @@
   (core/hmget [this k f-or-fs]
     (car/wcar config (apply car/hmget k (util/vec-wrap f-or-fs))))
 
-  ; TODO - arg format (tuples?)
-  ;(core/hmset [this k kvs])
+  (core/hmset [this k kvs]
+    (car/wcar config (apply car/hmset k (flatten kvs))))
 
-  ;(core/hset [this k f v])
+  (core/hset [this k f v]
+    (car/wcar config (car/hset k f v)))
 
-  ;(core/hsetnx [this k f v])
-
-  ;(core/hstrlen [this k f])
+  (core/hsetnx [this k f v]
+    (car/wcar config (car/hsetnx k f v)))
 
   (core/hvals [this k]
     (car/wcar config (car/hvals k)))

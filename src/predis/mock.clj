@@ -193,7 +193,7 @@
 
   (core/hgetall [this k]
     (let [vs (seq (or (core/get this k) []))]
-      (or vs [])))
+      (apply concat (or vs []))))
 
   (core/hincrby [this k f increment]
     (let [do-hincrby (fn [m]
@@ -218,13 +218,31 @@
           fs' (util/vec-wrap f-or-fs)]
       (util/values-at m fs')))
 
-  ; TODO: tuples
   (core/hmset [this k kvs]
     (let [do-merge (fn [m]
                      (->> (concat (seq (or m {})) kvs)
                           (into {})))]
       (swap! store update-in [k] do-merge)
       "OK"))
+
+  (core/hset [this k f v]
+    (let [m (or (core/get this k) {})
+          do-hset (fn [old] (assoc (or old {}) (str f) (str v)))]
+      (if (contains? m f)
+        (do
+          (swap! store update-in [k] do-hset)
+          0)
+        (do
+          (swap! store update-in [k] do-hset)
+          1))))
+
+  (core/hsetnx [this k f v]
+    (let [m (or (core/get this k) {})]
+      (if (contains? m f)
+        0
+        (do
+          (core/hset this k f v)
+          1))))
 
   (core/hvals [this k]
     (let [m (or (core/get this k) {})]

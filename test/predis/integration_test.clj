@@ -23,6 +23,11 @@
     (carmine/wcar redis-config (carmine/flushdb))
     (f)))
 
+(def gen-kv
+  (gen/tuple
+    (gen/not-empty gen/string-alphanumeric)
+    (gen/not-empty gen/string-alphanumeric)))
+
 (defn get-any [client k]
   (condp = (r/type client k)
     "string" (r/get client k)
@@ -46,6 +51,9 @@
 
 (defn assert-rpush [c1 c2 k vs]
   (is (= (r/rpush c1 k vs) (r/rpush c2 k vs))))
+
+(defn assert-hmset [c1 c2 k kvs]
+  (is (= (r/hmset c1 k kvs) (r/hmset c2 k kvs))))
 
 (defn assert-sadd [c1 c2 k vs]
   (is (= (r/sadd c1 k vs) (r/sadd c2 k vs))))
@@ -133,17 +141,58 @@
 ;(defspec test-hdel)
 ;(defspec test-hexists)
 ;(defspec test-hget)
-;(defspec test-hgetall)
+
+(defspec test-hgetall
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty (gen/vector gen-kv))]
+      (is (= (r/hmset mock-client k kvs) (r/hmset carmine-client k kvs)))
+      (is (= (sort (r/hgetall mock-client k)) (sort (r/hgetall carmine-client k))))
+      (dbs-equal mock-client carmine-client))))
+
 ;(defspec test-hincrby)
 ;(defspec test-hincrbyfloat)
 ;;defspec test-hkeys)
 ;(defspec test-hlen)
 ;(defspec test-hmget)
-;(defspec test-hmset)
-;;defspec test-hset)
-;;defspec test-hsetnx)
-;;defspec test-hstrlen)
-;(defspec test-hvals)
+
+(defspec test-hmset
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty (gen/vector gen-kv))]
+      (is (= (r/hmset mock-client k kvs) (r/hmset carmine-client k kvs)))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-hset
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   f (gen/not-empty gen/string-alphanumeric)
+                   v gen/int]
+      (is (= (r/hset mock-client k f v) (r/hset carmine-client k f v)))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-hsetnx
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   f (gen/not-empty gen/string-alphanumeric)
+                   v1 gen/int
+                   v2 gen/int]
+      (is (= (r/hsetnx mock-client k f v1) (r/hsetnx carmine-client k f v1)))
+      (is (= (r/hsetnx mock-client k f v2) (r/hsetnx carmine-client k f v2)))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-hvals
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty (gen/vector gen-kv))]
+      (assert-hmset mock-client carmine-client k kvs)
+      (is (= (sort (r/hvals mock-client k)) (sort (r/hvals carmine-client k))))
+      (dbs-equal mock-client carmine-client))))
 
 ; Lists
 ;;(lindex [this k idx])
