@@ -97,6 +97,17 @@
         (associative? x) "hash"
         :else "none")))
 
+  (core/scan [this cursor]
+    (core/scan this cursor {}))
+
+  (core/scan [this cursor {:keys [match count] :as opts}]
+    (let [pat (or match "*")
+          ks (core/keys this pat)
+          ks' (if count
+                (take count ks)
+                ks)]
+      [cursor ks']))
+
   ;; Server
   (core/flushdb [this]
     (reset! store {})

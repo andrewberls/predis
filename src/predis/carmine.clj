@@ -32,6 +32,18 @@
   (core/type [this k]
     (car/wcar config (car/type k)))
 
+  (core/scan [this k]
+    (core/scan this k {}))
+
+  (core/scan [this cursor {:keys [match count]}]
+    (let [match' (when match ["MATCH" match])
+          count' (when count ["COUNT" count])
+          scan-opts (->> (filter identity [match' count'])
+                         (apply concat))]
+      (if (empty? scan-opts)
+        (car/wcar config (car/scan cursor))
+        (car/wcar config (apply car/scan cursor scan-opts)))))
+
   ; Server
   (core/flushdb [this]
     (car/wcar config (car/flushdb)))

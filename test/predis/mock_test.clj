@@ -44,6 +44,15 @@
     (is (= "set" (r/type redis "quux")))
     (is (= "hash" (r/type redis "norf")))))
 
+(deftest test-scan
+  (let [redis (mock/->redis {"foo" 1 "far" 2 "bar" 3 "quux" 4})
+        cursor "0"]
+    (is (= [cursor ["foo" "bar" "far" "quux"]] (r/scan redis cursor)))
+    (is (= [cursor ["foo" "bar" "far" "quux"]] (r/scan redis cursor {:match "*"})))
+    (is (= [cursor ["foo" "far"]] (r/scan redis cursor {:match "f*"})))
+    (is (= [cursor ["bar" "far"]] (r/scan redis cursor {:match "*ar"})))
+    (is (= [cursor ["foo"]] (r/scan redis cursor {:match "*" :count 1})))))
+
 ; Server
 (deftest test-flushdb
   (let [redis (mock/->redis {"foo" 1 "bar" 2})]

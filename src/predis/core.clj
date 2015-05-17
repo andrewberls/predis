@@ -10,6 +10,7 @@
   (rename [this k new-k])
   (renamenx [this k new-k])
   (type [this k])
+  (scan [this cursor] [this cursor opts])
 
   ; Server
   (flushdb [this])
