@@ -161,20 +161,20 @@
     (is (= [] (r/hgetall redis "fake-key")))))
 
 (deftest test-hincrby
-  (let [redis (mock/->redis {"foo" {"bar" 1}})]
+  (let [redis (mock/->redis {"foo" {"bar" "1"}})]
     (is (= 4 (r/hincrby redis "foo" "bar" 3)))
-    (is (= {"foo" {"bar" 4}} @(.store redis)))
+    (is (= {"foo" {"bar" "4"}} @(.store redis)))
 
     (is (= -5 (r/hincrby redis "foo" "new-field" -5)))
-    (is (= {"foo" {"bar" 4 "new-field" -5}} @(.store redis)))
+    (is (= {"foo" {"bar" "4" "new-field" "-5"}} @(.store redis)))
 
     (is (= 10 (r/hincrby redis "new-key" "norf" 10)))
-    (is (= {"foo" {"bar" 4 "new-field" -5} "new-key" {"norf" 10}} @(.store redis)))))
+    (is (= {"foo" {"bar" "4" "new-field" "-5"} "new-key" {"norf" "10"}} @(.store redis)))))
 
 (deftest test-hincrbyfloat
-  (let [redis (mock/->redis {"foo" {"bar" 5}})]
-    (r/hincrbyfloat redis "foo" "bar" 4.3)
-    (is (= {"foo" {"bar" 9.3}} @(.store redis)))))
+  (let [redis (mock/->redis {"foo" {"bar" "5"}})]
+    (is (= 9.3 (r/hincrbyfloat redis "foo" "bar" 4.3)))
+    (is (= {"foo" {"bar" "9.3"}} @(.store redis)))))
 
 (deftest test-hlen
   (let [redis (mock/->redis {"foo" {"bar" 1 "quux" 2}})]

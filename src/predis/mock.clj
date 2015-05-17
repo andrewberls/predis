@@ -53,8 +53,8 @@
   core/IRedis
   ;; Keys
   (core/del [this k-or-ks]
-    (let [ks' (util/vec-wrap k-or-ks)
-          [store' nremoved] (util/counting-dissoc @store ks')]
+    (let [[store' nremoved] (->> (util/vec-wrap k-or-ks)
+                                 (util/counting-dissoc @store))]
       (reset! store store')
       nremoved))
 
@@ -125,7 +125,7 @@
 
   (core/decrby [this k decrement]
     (let [do-decrby (fn [old]
-                      (->> (- (if old (do (assert (string? old)) (Integer/parseInt old)) 0) decrement)
+                      (->> (- (if old (Integer/parseInt old) 0) decrement)
                            str))]
       (swap! store update-in [k] do-decrby)
       (Integer/parseInt (core/get this k))))
@@ -195,16 +195,19 @@
     (let [vs (seq (or (core/get this k) []))]
       (or vs [])))
 
-  ; TODO: str
   (core/hincrby [this k f increment]
     (let [do-hincrby (fn [m]
-                       (let [old (get m f 0)]
-                         (assoc m f (+ old increment))))]
+                       (let [old (Integer/parseInt (get m f "0"))]
+                         (assoc m f (str (+ old increment)))))]
       (swap! store update-in [k] do-hincrby)
-      (core/hget this k f)))
+      (Integer/parseInt (core/hget this k f))))
 
   (core/hincrbyfloat [this k f increment]
-    (core/hincrby this k f increment))
+    (let [do-hincrby (fn [m]
+                       (let [old (Double/parseDouble (get m f "0"))]
+                         (assoc m f (str (+ old increment)))))]
+      (swap! store update-in [k] do-hincrby)
+      (Double/parseDouble (core/hget this k f))))
 
   (core/hlen [this k]
     (let [m (or (core/get this k) {})]
