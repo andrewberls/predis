@@ -269,8 +269,17 @@
       (dbs-equal mock-client carmine-client))))
 
 ; Lists
-;;(lindex [this k idx])
-;;(linsert [k pos pivot v])
+(defspec test-lindex
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))
+                   idx gen/int]
+      (assert-rpush mock-client carmine-client k vs)
+      (is (= (r/lindex mock-client k idx) (r/lindex carmine-client k idx)))
+      (dbs-equal mock-client carmine-client))))
+
+;(defspec test-linsert)
 
 (defspec test-llen
   10

@@ -220,6 +220,16 @@
     (is (= [] (r/hvals redis "fake-key")))))
 
 ; Lists
+(deftest test-lindex
+  (let [redis (mock/->redis {"foo" ["1" "2" "3"]})]
+    (is (= "1" (r/lindex redis "foo" 0)))
+    (is (= "2" (r/lindex redis "foo" 1)))
+    (is (= "3" (r/lindex redis "foo" -1)))
+    (is (= "2" (r/lindex redis "foo" -2)))
+    (is (= nil (r/lindex redis "foo" -100)))
+    (is (= nil (r/lindex redis "foo" 100)))
+    (is (= nil (r/lindex redis "fake-key" 0)))))
+
 (deftest test-llen
   (let [redis (mock/->redis {"foo" ["1" "2" "3"]})]
     (is (= 3 (r/llen redis "foo")))

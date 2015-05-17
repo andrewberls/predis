@@ -256,6 +256,14 @@
       (or (vals (sort m)) [])))
 
   ;; Lists
+  (core/lindex [this k idx]
+    (let [vs (vec (core/get this k))
+          last-idx (dec (count vs))
+          idx' (normalized-end-idx vs idx)]
+      ; Differ from lrange here
+      (when (< idx last-idx)
+        (get vs idx'))))
+
   (core/llen [this k]
     (count (core/get this k)))
 

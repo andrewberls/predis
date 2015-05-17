@@ -131,6 +131,9 @@
     (car/wcar config (car/hvals k)))
 
   ; Lists
+  (core/lindex [this k idx]
+    (car/wcar config (car/lindex k idx)))
+
   (core/llen [this k]
     (car/wcar config (car/llen k)))
 

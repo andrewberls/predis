@@ -50,7 +50,7 @@
   (hvals [this k])
 
   ; Lists
-  ;(lindex [this k idx])
+  (lindex [this k idx])
   ;(linsert [k pos pivot v])
   (llen [this k])
   (lpop [this k])
