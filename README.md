@@ -16,3 +16,14 @@ TODO
 (redis/set mock-client "foo" "bar") ; => "OK"
 (redis/get mock-client "foo") ; => "bar"
 ```
+
+The API is the same for the real Carmine client:
+
+```clj
+(require '[predis.carmine :as carmine])
+
+; Default config optionally shown
+(def carmine-client (carmine/->redis {:pool {} :spec {:host "127.0.0.1" :port 6379}}))
+(redis/set carmine-client "foo" "bar") ; => "OK"
+(redis/get carmine-client "foo") ; => "bar"
+```
