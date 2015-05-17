@@ -180,7 +180,9 @@
     (if-let [m (core/get this k)]
       (let [[m' nremoved] (->> (util/vec-wrap f-or-fs)
                                (util/counting-dissoc m))]
-        (swap! store assoc k m')
+        (if (seq m')
+          (swap! store assoc k m')
+          (swap! store dissoc k))
         nremoved)
       0))
 
@@ -189,7 +191,7 @@
 
   (core/hget [this k f]
     (let [m (or (core/get this k) {})]
-      (get m f)))
+      (get m (str f))))
 
   (core/hgetall [this k]
     (let [vs (seq (or (core/get this k) []))]
@@ -197,17 +199,21 @@
 
   (core/hincrby [this k f increment]
     (let [do-hincrby (fn [m]
-                       (let [old (Integer/parseInt (get m f "0"))]
+                       (let [old (Integer/parseInt (get m (str f) "0"))]
                          (assoc m f (str (+ old increment)))))]
       (swap! store update-in [k] do-hincrby)
       (Integer/parseInt (core/hget this k f))))
 
   (core/hincrbyfloat [this k f increment]
     (let [do-hincrby (fn [m]
-                       (let [old (Double/parseDouble (get m f "0"))]
+                       (let [old (Double/parseDouble (get m (str f) "0"))]
                          (assoc m f (str (+ old increment)))))]
       (swap! store update-in [k] do-hincrby)
       (Double/parseDouble (core/hget this k f))))
+
+  (core/hkeys [this k]
+    (or (keys (core/get this k))
+        []))
 
   (core/hlen [this k]
     (let [m (or (core/get this k) {})]
@@ -219,8 +225,9 @@
       (util/values-at m fs')))
 
   (core/hmset [this k kvs]
-    (let [do-merge (fn [m]
-                     (->> (concat (seq (or m {})) kvs)
+    (let [kvs' (map (fn [[f v]] [(str f) (str v)]) kvs)
+          do-merge (fn [m]
+                     (->> (concat (seq (or m {})) kvs')
                           (into {})))]
       (swap! store update-in [k] do-merge)
       "OK"))

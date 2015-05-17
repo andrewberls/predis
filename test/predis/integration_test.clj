@@ -138,9 +138,40 @@
       (dbs-equal mock-client carmine-client))))
 
 ; Hashes
-;(defspec test-hdel)
-;(defspec test-hexists)
-;(defspec test-hget)
+(defspec test-hdel
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty (gen/vector gen-kv))]
+      (assert-hmset mock-client carmine-client k kvs)
+      (let [f (ffirst kvs)]
+        (is (= (r/hdel mock-client k f) (r/hdel carmine-client k f)))
+        (is (= (r/hdel mock-client k "fake-field") (r/hdel carmine-client k "fake-field")))
+        (dbs-equal mock-client carmine-client)))))
+
+(defspec test-hexists
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty (gen/vector gen-kv))]
+      (assert-hmset mock-client carmine-client k kvs)
+      (let [f (ffirst kvs)]
+        (is (= (r/hexists mock-client k f) (r/hexists carmine-client k f)))
+        (is (= (r/hexists mock-client k "fake-field") (r/hexists carmine-client k "fake-field")))
+        (dbs-equal mock-client carmine-client)))))
+
+(defspec test-hget
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty (gen/vector gen-kv))]
+      (assert-hmset mock-client carmine-client k kvs)
+      (let [f (ffirst kvs)]
+        (is (= (r/hget mock-client k f) (r/hget carmine-client k f)))
+        (is (= (r/hget mock-client k "fake-field") (r/hget carmine-client k "fake-field")))
+        (is (= (r/hget mock-client "fake-key" "fake-field")
+               (r/hget carmine-client "fake-key" "fake-field")))
+        (dbs-equal mock-client carmine-client)))))
 
 (defspec test-hgetall
   10
@@ -151,11 +182,54 @@
       (is (= (sort (r/hgetall mock-client k)) (sort (r/hgetall carmine-client k))))
       (dbs-equal mock-client carmine-client))))
 
-;(defspec test-hincrby)
-;(defspec test-hincrbyfloat)
-;;defspec test-hkeys)
-;(defspec test-hlen)
-;(defspec test-hmget)
+(defspec test-hincrby
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty
+                         (gen/vector (gen/tuple
+                                       (gen/not-empty gen/string-alphanumeric)
+                                       gen/int)))
+                   increment gen/int]
+      (assert-hmset mock-client carmine-client k kvs)
+      (let [f (ffirst kvs)]
+        (is (= (r/hincrby mock-client k f increment)
+               (r/hincrby carmine-client k f increment)))
+        (is (= (r/hincrby mock-client"fake-key" f increment)
+               (r/hincrby carmine-client"fake-key" f increment)))
+        (is (= (r/hincrby mock-client k "fake-field" increment)
+               (r/hincrby carmine-client k "fake-field" increment)))
+        (dbs-equal mock-client carmine-client)))))
+
+(defspec test-hkeys
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty (gen/vector gen-kv))]
+      (assert-hmset mock-client carmine-client k kvs)
+      (is (= (sort (r/hkeys mock-client k)) (sort (r/hkeys carmine-client k)))))))
+
+(defspec test-hlen
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty (gen/vector gen-kv))]
+      (assert-hmset mock-client carmine-client k kvs)
+      (is (= (r/hlen mock-client k) (r/hlen carmine-client k)))
+      (is (= (r/hlen mock-client "fake-key") (r/hlen carmine-client "fake-key")))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-hmget
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs (gen/not-empty (gen/vector gen-kv))
+                   nfields gen/s-pos-int]
+      (assert-hmset mock-client carmine-client k kvs)
+      (let [fs (take nfields (map first kvs))]
+        (is (= (r/hmget mock-client k fs) (r/hmget carmine-client k fs)))
+        (is (= (r/hmget mock-client "fake-key" fs) (r/hmget carmine-client "fake-key" fs)))
+        (dbs-equal mock-client carmine-client)))))
 
 (defspec test-hmset
   10

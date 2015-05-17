@@ -109,7 +109,8 @@
   (core/hincrbyfloat [this k f increment]
     (car/wcar config (car/hincrbyfloat k f increment)))
 
-  ;(core/hkeys [this k])
+  (core/hkeys [this k]
+    (car/wcar config (car/hkeys k)))
 
   (core/hlen [this k]
     (car/wcar config (car/hlen k)))

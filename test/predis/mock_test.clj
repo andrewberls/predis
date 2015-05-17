@@ -176,6 +176,11 @@
     (is (= 9.3 (r/hincrbyfloat redis "foo" "bar" 4.3)))
     (is (= {"foo" {"bar" "9.3"}} @(.store redis)))))
 
+(deftest test-hkeys
+  (let [redis (mock/->redis {"foo" {"bar" "1" "quux" "2"}})]
+    (is (= ["bar" "quux"] (sort (r/hkeys redis "foo"))))
+    (is (= [] (r/hkeys redis "fake-key")))))
+
 (deftest test-hlen
   (let [redis (mock/->redis {"foo" {"bar" 1 "quux" 2}})]
     (is (= 2 (r/hlen redis "foo")))

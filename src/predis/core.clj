@@ -41,7 +41,7 @@
   (hgetall [this k])
   (hincrby [this k f increment])
   (hincrbyfloat [this k f increment])
-  ;(hkeys [this k])
+  (hkeys [this k])
   (hlen [this k])
   (hmget [this k f-or-fs])
   (hmset [this k kvs])
