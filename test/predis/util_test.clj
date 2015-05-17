@@ -19,7 +19,9 @@
 
 (deftest test-counting-union
   (let [s1 #{1 2 3}]
+    (is (= [#{1 2 3 4} 4] (util/counting-union #{} [1 2 3 4])))
     (is (= [#{1 2 3 4} 1] (util/counting-union s1 [4])))
+    (is (= [#{1 2 3 4 5} 2] (util/counting-union s1 [2 3 4 5])))
     (is (= [#{1 2 3 4 5} 2] (util/counting-union s1 [1 2 4 5])))
     (is (= [#{1 2 3} 0] (util/counting-union s1 [2 3])))))
 

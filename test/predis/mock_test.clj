@@ -310,9 +310,9 @@
 
 (deftest test-sismember
   (let [redis (mock/->redis {"foo" #{"1" "2" "3"}})]
-    (is (= true (r/sismember redis "foo" 1)))
-    (is (= false (r/sismember redis "foo" 99)))
-    (is (= false (r/sismember redis "bar" 1)))))
+    (is (= 1 (r/sismember redis "foo" 1)))
+    (is (= 0 (r/sismember redis "foo" 99)))
+    (is (= 0 (r/sismember redis "bar" 1)))))
 
 (deftest test-smembers
   (let [redis (mock/->redis {"foo" #{"1" "2" "3"}})]

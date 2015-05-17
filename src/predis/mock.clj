@@ -272,7 +272,9 @@
                                (> cnt 0) (util/remove-first-n vs cnt v')
                                (< cnt 0) (util/remove-last-n vs (Math/abs cnt) v')
                                (= cnt 0) (util/remove-all vs v'))]
-          (swap! store assoc k vs')
+          (if (seq vs')
+            (swap! store assoc k vs')
+            (swap! store dissoc k))
           nremoved)
         0)))
 
@@ -296,8 +298,9 @@
   (core/sadd [this k m-or-ms]
     (let [s (or (core/get this k) #{})
           [s' nadded] (->> (util/vec-wrap m-or-ms)
+                           (map str)
                            (util/counting-union s))]
-      (swap! store assoc k s')
+      (swap! store assoc k (set (map str s')))
       nadded))
 
   (core/scard [this k]
@@ -330,7 +333,7 @@
       (core/scard this dest)))
 
   (core/sismember [this k m]
-    (contains? (set-at this k) (str m)))
+    (if (contains? (set-at this k) (str m)) 1 0))
 
   (core/smembers [this k]
     (seq (set-at this k)))
@@ -358,10 +361,12 @@
       (take cnt (repeatedly #(first (shuffle s))))))
 
   (core/srem [this k m-or-ms]
-    (let [ms' (util/vec-wrap m-or-ms)]
+    (let [ms' (map str (util/vec-wrap m-or-ms))]
       (if-let [s (set-at this k)]
         (let [[s' nremoved] (util/counting-disj s ms')]
-          (swap! store assoc k s')
+          (if (seq s')
+            (swap! store assoc k s')
+            (swap! store dissoc k))
           nremoved)
         0)))
 

@@ -27,8 +27,8 @@
   (condp = (r/type client k)
     "string" (r/get client k)
     "list" (r/lrange client k 0 -1)
-    "hash" (r/hgetall client k)
-    "set" (r/smembers client k)
+    "hash" (sort (r/hgetall client k))
+    "set" (sort (r/smembers client k))
     "zset" (throw (Exception. "Unsupported type"))
     "none" nil))
 
@@ -45,8 +45,10 @@
   (is (= (r/set c1 k v) (r/set c2 k v))))
 
 (defn assert-rpush [c1 c2 k vs]
-  (is (= (r/rpush c1 k vs) (r/rpush c2 k vs)))
-  (Thread/sleep 1000))
+  (is (= (r/rpush c1 k vs) (r/rpush c2 k vs))))
+
+(defn assert-sadd [c1 c2 k vs]
+  (is (= (r/sadd c1 k vs) (r/sadd c2 k vs))))
 
 (defn dbs-equal [c1 c2]
   (is (= (db c1) (db c2))))
@@ -188,10 +190,31 @@
              (r/lrange carmine-client k start stop)))
       (dbs-equal mock-client carmine-client))))
 
-;(defspec test-lrem)
+(defspec test-lrem
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))
+                   cnt gen/int]
+      (assert-rpush mock-client carmine-client k vs)
+      (let [v (first (shuffle vs))]
+        (is (= (r/lrem mock-client k cnt v) (r/lrem carmine-client k cnt v)))
+        (dbs-equal mock-client carmine-client)))))
+
 ;;(defspec test-lset)
 ;;(defspec test-ltrim)
-;(defspec test-rpop)
+
+(defspec test-rpop
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   fake-key gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))]
+      (assert-rpush mock-client carmine-client k vs)
+      (is (= (r/rpop mock-client k) (r/rpop carmine-client k)))
+      (is (= (r/rpop mock-client fake-key)
+             (r/rpop carmine-client fake-key)))
+      (dbs-equal mock-client carmine-client))))
 
 (defspec test-rpush
   10
@@ -202,17 +225,143 @@
       (dbs-equal mock-client carmine-client))))
 
 ; Sets
-;(defspec test-sadd)
-;(defspec test-scard)
-;(defspec test-sdiff)
-;(defspec test-sdiffstore)
-;(defspec test-sinter)
-;(defspec test-sinterstore)
-;(defspec test-sismember)
-;(defspec test-smembers)
-;(defspec test-smove)
-;(defspec test-spop)
-;(defspec test-srandmember)
-;(defspec test-srem)
-;(defspec test-sunion)
-;(defspec test-sunionstore)
+(defspec test-sadd
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k1 gen/string-alphanumeric
+                   v gen/int
+                   k2 gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))]
+      (is (= (r/sadd mock-client k1 v) (r/sadd carmine-client k1 v)))
+      (is (= (r/sadd mock-client k2 vs) (r/sadd carmine-client k2 vs)))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-scard
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client k vs)
+      (is (= (r/scard mock-client k) (r/scard carmine-client k)))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-sdiff
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k1 gen/string-alphanumeric
+                   vs1 (gen/not-empty (gen/vector gen/int))
+
+                   k2 gen/string-alphanumeric
+                   vs2 (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client k1 vs1)
+      (assert-sadd mock-client carmine-client k2 vs2)
+      (is (= (sort (r/sdiff mock-client k1)) (sort (r/sdiff carmine-client k1))))
+      (is (= (sort (r/sdiff mock-client [k1 k2])) (sort (r/sdiff carmine-client [k1 k2]))))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-sdiffstore
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [src gen/string-alphanumeric
+                   dest gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client src vs)
+      (is (= (r/sdiffstore mock-client dest src) (r/sdiffstore carmine-client dest src)))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-sinter
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k1 gen/string-alphanumeric
+                   vs1 (gen/not-empty (gen/vector gen/int))
+
+                   k2 gen/string-alphanumeric
+                   vs2 (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client k1 vs1)
+      (assert-sadd mock-client carmine-client k2 vs2)
+      (is (= (sort (r/sinter mock-client k1)) (sort (r/sinter carmine-client k1))))
+      (is (= (sort (r/sinter mock-client [k1 k2])) (sort (r/sinter carmine-client [k1 k2]))))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-sinterstore
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [src gen/string-alphanumeric
+                   dest gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client src vs)
+      (is (= (r/sinterstore mock-client dest src) (r/sinterstore carmine-client dest src)))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-sismember
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client k vs)
+      (let [v (first vs)]
+        (is (= (r/sismember mock-client k v) (r/sismember carmine-client k v))))
+      (is (= (r/sismember mock-client k "fake") (r/sismember carmine-client k "fake")))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-smembers
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client k vs)
+      (is (= (sort (r/smembers mock-client k)) (sort (r/smembers carmine-client k))))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-smove
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k1 gen/string-alphanumeric
+                   k2 gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))
+
+                   fake-1 gen/string-alphanumeric
+                   fake-2 gen/string-alphanumeric
+                   ]
+      (assert-sadd mock-client carmine-client k1 vs)
+      (let [v (first vs)]
+        (is (= (r/smove mock-client k1 k2 v) (r/smove mock-client k1 k2 v)))
+        (is (= (r/smove mock-client k1 k2 "fake") (r/smove mock-client k1 k2 "fake")))
+        (is (= (r/smove mock-client fake-1 k2 v) (r/smove mock-client fake-1 k2 v)))
+        (is (= (r/smove mock-client k1 fake-2 v) (r/smove mock-client k1 fake-2 v)))
+      (dbs-equal mock-client carmine-client)))))
+
+(defspec test-srem
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client k vs)
+      (let [v (first vs)]
+        (is (= (r/srem mock-client k v) (r/srem carmine-client k v)))
+        (is (= (r/srem mock-client k "fake") (r/srem carmine-client k "fake"))))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-sunion
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k1 gen/string-alphanumeric
+                   vs1 (gen/not-empty (gen/vector gen/int))
+
+                   k2 gen/string-alphanumeric
+                   vs2 (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client k1 vs1)
+      (assert-sadd mock-client carmine-client k2 vs2)
+      (is (= (sort (r/sunion mock-client k1)) (sort (r/sunion carmine-client k1))))
+      (is (= (sort (r/sunion mock-client [k1 k2])) (sort (r/sunion carmine-client [k1 k2]))))
+      (dbs-equal mock-client carmine-client))))
+
+(defspec test-sunionstore
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [src gen/string-alphanumeric
+                   dest gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))]
+      (assert-sadd mock-client carmine-client src vs)
+      (is (= (r/sunionstore mock-client dest src) (r/sunionstore carmine-client dest src)))
+      (dbs-equal mock-client carmine-client))))
