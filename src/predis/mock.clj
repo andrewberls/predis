@@ -395,7 +395,7 @@
       0)))
 
   (core/spop [this k]
-    (if-let [s (get this k)]
+    (if-let [s (core/get this k)]
       (let [m (first (shuffle s))]
         (core/srem this k m)
         m)))
