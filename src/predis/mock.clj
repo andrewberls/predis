@@ -23,6 +23,14 @@
   (if-let [vs (core/get redis k)]
     (set vs)))
 
+(defn- replace-seq
+  "If s is a non-empty seq, replace it at key k in store
+   Otherwise remove it from the store"
+  [store k s]
+  (if (seq s)
+    (swap! store assoc k s)
+    (swap! store dissoc k)))
+
 (defn normalized-start-idx
   "Given an start idx which may be negative (indicating offset from the end)
    or exceed the size of xs, return a normalized positive 0-based idx
@@ -184,9 +192,7 @@
     (if-let [m (core/get this k)]
       (let [[m' nremoved] (->> (util/vec-wrap f-or-fs)
                                (util/counting-dissoc m))]
-        (if (seq m')
-          (swap! store assoc k m')
-          (swap! store dissoc k))
+        (replace-seq store k m')
         nremoved)
       0))
 
@@ -276,9 +282,7 @@
       (when (seq vs)
         (let [v (first vs)
               vs' (rest vs)]
-          (if (seq vs')
-            (swap! store assoc k vs')
-            (swap! store dissoc k))
+          (replace-seq store k vs')
           v))))
 
   (core/lpush [this k v-or-vs]
@@ -315,9 +319,7 @@
                                (> cnt 0) (util/remove-first-n vs cnt v')
                                (< cnt 0) (util/remove-last-n vs (Math/abs cnt) v')
                                (= cnt 0) (util/remove-all vs v'))]
-          (if (seq vs')
-            (swap! store assoc k vs')
-            (swap! store dissoc k))
+          (replace-seq store k vs')
           nremoved)
         0)))
 
@@ -326,9 +328,7 @@
       (when (seq vs)
         (let [v (last vs)
               vs' (butlast vs)]
-          (if (seq vs')
-            (swap! store assoc k vs')
-            (swap! store dissoc k))
+          (replace-seq store k vs')
           v))))
 
   (core/rpush [this k v-or-vs]
@@ -413,9 +413,7 @@
     (let [ms' (map str (util/vec-wrap m-or-ms))]
       (if-let [s (set-at this k)]
         (let [[s' nremoved] (util/counting-disj s ms')]
-          (if (seq s')
-            (swap! store assoc k s')
-            (swap! store dissoc k))
+          (replace-seq store k s')
           nremoved)
         0)))
 
