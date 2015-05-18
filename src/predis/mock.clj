@@ -20,8 +20,7 @@
 ;;
 
 (defn- set-at [redis k]
-  (if-let [vs (core/get redis k)]
-    (set vs)))
+  (set (core/get redis k)))
 
 (defn- replace-seq
   "If s is a non-empty seq, replace it at key k in store
@@ -386,13 +385,12 @@
     (seq (set-at this k)))
 
   (core/smove [this src dest m]
-    (if-let [s (set-at this src)]
-      (if (contains? s m)
-        (do
-          (core/srem this src m)
-          (core/sadd this dest m)
-          1)
-      0)))
+    (if (contains? (set-at this src) m)
+      (do
+        (core/srem this src m)
+        (core/sadd this dest m)
+        1)
+    0))
 
   (core/spop [this k]
     (if-let [s (core/get this k)]
@@ -408,8 +406,9 @@
       (take cnt (shuffle s))))
 
   (core/srem [this k m-or-ms]
-    (let [ms' (map str (util/vec-wrap m-or-ms))]
-      (if-let [s (set-at this k)]
+    (let [ms' (map str (util/vec-wrap m-or-ms))
+          s (set-at this k)]
+      (if (seq s)
         (let [[s' nremoved] (util/counting-disj s ms')]
           (replace-seq store k s')
           nremoved)
