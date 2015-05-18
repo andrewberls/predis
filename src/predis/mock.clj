@@ -98,6 +98,7 @@
   (core/scan [this cursor]
     (core/scan this cursor {}))
 
+  ; TODO: count is really supposed to affect the cursor returned
   (core/scan [this cursor {:keys [match count] :as opts}]
     (let [pat (or match "*")
           ks (core/keys this pat)
