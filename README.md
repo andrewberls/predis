@@ -29,3 +29,11 @@ The API is the same for the real Carmine client:
 (redis/set carmine-client "foo" "bar") ; => "OK"
 (redis/get carmine-client "foo") ; => "bar"
 ```
+
+### Documentation
+
+[API Docs](http://andrewberls.github.io/predis/)
+
+### Contributing
+Please use the [GitHub issues page](https://github.com/andrewberls/predis/issues) for questions/comments/suggestions (pull requests welcome!).
+You can also find me on [Twitter](https://twitter.com/aberls).
