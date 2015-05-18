@@ -407,7 +407,7 @@
 
   (core/srandmember [this k cnt]
     (when-let [s (get this k)]
-      (take cnt (repeatedly #(first (shuffle s))))))
+      (take cnt (shuffle s))))
 
   (core/srem [this k m-or-ms]
     (let [ms' (map str (util/vec-wrap m-or-ms))]
