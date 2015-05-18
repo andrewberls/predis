@@ -14,7 +14,7 @@
 
   ; Server
   (flushdb [this])
-  ;(dbsize [this])
+  (dbsize [this])
 
   ; Connection
   (ping [this])

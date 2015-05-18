@@ -48,6 +48,9 @@
   (core/flushdb [this]
     (car/wcar config (car/flushdb)))
 
+  (core/dbsize [this]
+    (car/wcar config (car/dbsize)))
+
   ; Connection
   (core/ping [this]
     (car/wcar config (car/ping)))

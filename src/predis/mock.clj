@@ -111,6 +111,9 @@
     (reset! store {})
     "OK")
 
+  (core/dbsize [this]
+    (count (keys @store)))
+
   ;; Connection
   (core/ping [this] "PONG")
 

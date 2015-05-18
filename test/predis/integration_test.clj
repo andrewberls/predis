@@ -84,6 +84,18 @@
       (is (= (r/rename mock-client k1 k2) (r/rename carmine-client k1 k2)))
       (dbs-equal mock-client carmine-client))))
 
+; Server
+(defspec test-dbsize
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k1 (gen/not-empty gen/string-alphanumeric)
+                   v1 gen/string-alphanumeric
+                   k2 (gen/not-empty gen/string-alphanumeric)
+                   v2 gen/string-alphanumeric]
+      (assert-set mock-client carmine-client k1 v1)
+      (assert-set mock-client carmine-client k2 v2)
+      (is (= (r/dbsize mock-client) (r/dbsize carmine-client))))))
+
 ; Strings
 (defspec test-append
   10
