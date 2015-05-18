@@ -6,4 +6,6 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [com.taoensso/carmine "2.10.0"]
                  [org.clojure/test.check "0.7.0"]]
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all}}
+  :plugins [[codox "0.8.12"]]
+  :codox {:src-dir-uri "http://github.com/andrewberls/predis/tree/master"})
