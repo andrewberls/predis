@@ -4,9 +4,9 @@ Predis is a Clojure protocol for [Redis](http://redis.io/), which allows for mul
 Most notably Predis provides an in-memory mock client implementation for testing purposes, similar to, and inspired by [brigade/mock_redis](https://github.com/brigade/mock_redis).
 
 ### Installation
-TODO
+[![Clojars Project](http://clojars.org/com.andrewberls/predis/latest-version.svg)]()
 
-![](https://circleci.com/gh/andrewberls/predis.svg?style=shield&circle-token=b3151df11a25e1354af007e40c727ead5b9e676e)
+![Build Status](https://circleci.com/gh/andrewberls/predis.svg?style=shield&circle-token=b3151df11a25e1354af007e40c727ead5b9e676e)
 
 ### Usage
 ```clj
