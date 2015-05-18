@@ -51,7 +51,8 @@
     (is (= [cursor ["foo" "bar" "far" "quux"]] (r/scan redis cursor {:match "*"})))
     (is (= [cursor ["foo" "far"]] (r/scan redis cursor {:match "f*"})))
     (is (= [cursor ["bar" "far"]] (r/scan redis cursor {:match "*ar"})))
-    (is (= [cursor ["foo"]] (r/scan redis cursor {:match "*" :count 1})))))
+    ; Count hint is ignored
+    (is (= [cursor ["foo" "bar" "far" "quux"]] (r/scan redis cursor {:match "*" :count 1})))))
 
 ; Server
 (deftest test-flushdb

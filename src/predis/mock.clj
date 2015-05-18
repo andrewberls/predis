@@ -106,14 +106,12 @@
   (core/scan [this cursor]
     (core/scan this cursor {}))
 
-  ; TODO: count is really supposed to affect the cursor returned
   (core/scan [this cursor {:keys [match count] :as opts}]
+    ; Note - `count` is a hint for the implementation, and
+    ; is ignored here
     (let [pat (or match "*")
-          ks (core/keys this pat)
-          ks' (if count
-                (take count ks)
-                ks)]
-      [cursor ks']))
+          ks (core/keys this pat)]
+      ["0" ks]))
 
   ;; Server
   (core/flushdb [this]
