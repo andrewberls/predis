@@ -35,6 +35,9 @@ The API is the same for the real Carmine client:
 
 [API Docs](http://andrewberls.github.io/predis/)
 
+Note that not every single Redis API operation is supported; consult the [protocol documentation](http://andrewberls.github.io/predis/predis.core.html) for the up-to-date
+list of supported operations.
+
 ### Contributing
 Please use the [GitHub issues page](https://github.com/andrewberls/predis/issues) for questions/comments/suggestions (pull requests welcome!).
 You can also find me on [Twitter](https://twitter.com/aberls).
