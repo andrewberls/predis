@@ -55,7 +55,7 @@
   (llen [this k])
   (lpop [this k])
   (lpush [this k v-or-vs])
-  ;(lpushx [this k v])
+  (lpushx [this k v])
   (lrange [this k start stop])
   (lrem [this k cnt v])
   ;(lset [this k idx v])
@@ -63,7 +63,7 @@
   (rpop [this k])
   ;(rpoplpush [this src dest])
   (rpush [this k v-or-vs])
-  ;(rpushx [this k v])
+  (rpushx [this k v])
 
   ; Sets
   (sadd [this k m-or-ms])

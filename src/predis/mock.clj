@@ -261,7 +261,7 @@
           last-idx (dec (count vs))
           idx' (normalized-end-idx vs idx)]
       ; Differ from lrange here
-      (when (< idx last-idx)
+      (when (<= idx last-idx)
         (get vs idx'))))
 
   (core/llen [this k]
@@ -283,6 +283,12 @@
       (doseq [v vs']
         (swap! store update-in [k] do-push (str v)))
       (core/llen this k)))
+
+  (core/lpushx [this k v]
+    (let [vs (core/get this k)]
+      (if (seq vs)
+        (core/lpush this k v)
+        (core/llen this k))))
 
   (core/lrange [this k start stop]
     (let [vs (vec (core/get this k))
@@ -326,6 +332,12 @@
           do-push (fn [old-vs] (concat (or old-vs []) (map str vs')))]
       (swap! store update-in [k] do-push)
       (core/llen this k)))
+
+  (core/rpushx [this k v]
+    (let [vs (core/get this k)]
+      (if (seq vs)
+        (core/rpush this k v)
+        (core/llen this k))))
 
   ; Sets
   (core/sadd [this k m-or-ms]

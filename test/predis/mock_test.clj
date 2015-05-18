@@ -254,6 +254,12 @@
     (r/lpush redis "new-key" ["1" "2" "3"])
     (is (= {"foo" ["5" "4" "1" "2" "3"] "new-key" ["3" "2" "1"]} @(.store redis)))))
 
+(deftest test-lpushx
+  (let [redis (mock/->redis {"foo" ["1" "2" "3"]})]
+    (is (= 4 (r/lpushx redis "foo" "4")))
+    (is (= {"foo" ["4" "1" "2" "3"]} @(.store redis)))
+    (is (= 0 (r/lpushx redis "fake-key" "1")))))
+
 (deftest test-lrange
   (let [redis (mock/->redis {"foo" ["1" "2" "3" "4" "5" "6" "7" "8"]})]
     (is (= ["1" "2" "3"] (r/lrange redis "foo" 0 2)))
@@ -295,6 +301,13 @@
     (is (= {"foo" ["1" "2" "3" "4" "5"]} @(.store redis)))
     (r/rpush redis "new-key" ["1" "2" "3"])
     (is (= {"foo" ["1" "2" "3" "4" "5"] "new-key" ["1" "2" "3"]} @(.store redis)))))
+
+(deftest test-rpushx
+  (let [redis (mock/->redis {"foo" ["1" "2" "3"]})]
+    (is (= 4 (r/rpushx redis "foo" "4")))
+    (is (= {"foo" ["1" "2" "3" "4"]} @(.store redis)))
+    (is (= 0 (r/rpushx redis "fake-key" "1")))))
+
 
 ; Sets
 (deftest test-sadd

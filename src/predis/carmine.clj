@@ -143,6 +143,9 @@
   (core/lpush [this k v-or-vs]
     (car/wcar config (apply car/lpush k (util/vec-wrap v-or-vs))))
 
+  (core/lpushx [this k v]
+    (car/wcar config (car/lpushx k v)))
+
   (core/lrange [this k start stop]
     (car/wcar config (car/lrange k start stop)))
 
@@ -154,6 +157,9 @@
 
   (core/rpush [this k v-or-vs]
     (car/wcar config (apply car/rpush k (util/vec-wrap v-or-vs))))
+
+  (core/rpushx [this k v]
+    (car/wcar config (car/rpushx k v)))
 
   ; Sets
   (core/sadd [this k m-or-ms]

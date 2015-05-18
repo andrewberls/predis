@@ -310,6 +310,18 @@
       (is (= (r/lpush mock-client k vs) (r/lpush carmine-client k vs)))
       (dbs-equal mock-client carmine-client))))
 
+(defspec test-lpushx
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k1 gen/string-alphanumeric
+                   k2 gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))
+                   v gen/int]
+      (is (= (r/lpushx mock-client k1 v) (r/lpushx carmine-client k1 v)))
+      (assert-rpush mock-client carmine-client k2 vs)
+      (is (= (r/lpushx mock-client k2 v) (r/lpushx carmine-client k2 v)))
+      (dbs-equal mock-client carmine-client))))
+
 (defspec test-lrange
   50
   (let [mock-client (mock/->redis)]
