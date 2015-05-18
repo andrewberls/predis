@@ -1,7 +1,7 @@
 (ns predis.util)
 
 (defn vec-wrap [v-or-vs]
-  (if (coll? v-or-vs) v-or-vs [v-or-vs]))
+  (if (sequential? v-or-vs) v-or-vs [v-or-vs]))
 
 (defn values-at
   "Similar to (comp vals select-keys), but includes nil for missing keys
