@@ -77,7 +77,7 @@
   (lpushx [this k v])
   (lrange [this k start stop])
   (lrem [this k cnt v])
-  ;(lset [this k idx v])
+  (lset [this k idx v])
   ;(ltrim [this k start stop])
   (rpop [this k])
   ;(rpoplpush [this src dest])

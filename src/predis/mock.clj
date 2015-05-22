@@ -328,6 +328,12 @@
           (replace-seq store k vs')
           v))))
 
+  (core/lset [this k idx v]
+    (let [vs (vec (core/get this k))
+          idx' (normalized-start-idx vs idx)
+          vs' (assoc vs idx' v)]
+      (swap! store assoc k vs')))
+
   (core/rpush [this k v-or-vs]
     (let [vs' (util/vec-wrap v-or-vs)
           do-push (fn [old-vs] (concat (or old-vs []) (map str vs')))]

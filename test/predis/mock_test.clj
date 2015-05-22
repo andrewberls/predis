@@ -294,6 +294,13 @@
     (is (= {} @(.store redis)))
     (is (= nil (r/rpop redis "fake-key")))))
 
+(deftest test-lset
+  (let [redis (mock/->redis {"foo" ["1" "2" "3"]})]
+    (r/lset redis "foo" 0 "5")
+    (r/lset redis "foo" -1 "9")
+    (is (= ["5" "2" "3"]) @(.store redis))
+    (is (= ["5" "2" "9"]) @(.store redis))))
+
 (deftest test-rpush
   (let [redis (mock/->redis {"foo" ["1" "2" "3"]})]
     (is (= 4 (r/rpush redis "foo" [4])))
