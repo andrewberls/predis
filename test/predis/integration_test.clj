@@ -126,6 +126,18 @@
       (is (= (r/get mock-client k)
              (r/get carmine-client k))))))
 
+(defspec test-getrange
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   s gen/string-alphanumeric
+                   start gen/int
+                   end gen/int]
+      (assert-set mock-client carmine-client k s)
+      (is (= (r/getrange mock-client k start end)
+             (r/getrange carmine-client k start end)))
+      (dbs-equal mock-client carmine-client))))
+
 (defspec test-incrby
   10
   (let [mock-client (mock/->redis)]
