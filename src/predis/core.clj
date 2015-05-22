@@ -31,7 +31,7 @@
   (decr [this k])
   (decrby [this k decrement])
   (get [this k])
-  ;(getrange [this k start end])
+  (getrange [this k start end])
   (incr [this k])
   (incrby [this k increment])
   (incrbyfloat [this k increment])

@@ -142,6 +142,16 @@
   (core/get [this k]
     (get @store (str k)))
 
+  (core/getrange [this k start end]
+    (let [string (core/get this k)
+          start' (normalized-start-idx string start)
+          end' (normalized-end-idx string end)]
+      (if (> start' end')
+        ""
+        (if (< (count string) end)
+          (subs string start' (count string))
+          (subs string start' (inc end'))))))
+
   (core/incr [this k]
     (core/incrby this k 1))
 

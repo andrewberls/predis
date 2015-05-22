@@ -87,6 +87,12 @@
     (is (= "baz" (r/get redis "bar")))
     (is (= nil (r/get redis "fake-key")))))
 
+(deftest test-getrange
+  (let [redis (mock/->redis {"foo" "Petesta"})]
+    (is (= "") (r/getrange redis "foo" 4 2))
+    (is (= "Petesta") (r/getrange redis "foo" 0 100))
+    (is (= "Pete" (r/getrange redis "foo" 0 3)))))
+
 (deftest test-incr
   (let [redis (mock/->redis {"foo" "2"})]
     (r/incr redis "foo")
