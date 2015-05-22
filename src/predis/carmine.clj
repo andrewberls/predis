@@ -158,6 +158,9 @@
   (core/lrem [this k cnt v]
     (car/wcar config (car/lrem k cnt v)))
 
+  (core/lset [this k idx v]
+    (car/wcar config (car/lset k idx v)))
+
   (core/rpop [this k]
     (car/wcar config (car/rpop k)))
 

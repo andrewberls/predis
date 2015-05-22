@@ -340,9 +340,11 @@
 
   (core/lset [this k idx v]
     (let [vs (vec (core/get this k))
-          idx' (normalized-start-idx vs idx)
+          idx' (normalized-end-idx vs idx)
           vs' (assoc vs idx' v)]
-      (swap! store assoc k vs')))
+      (assert (< idx' (count vs)))
+      (swap! store assoc k vs' )
+      "OK"))
 
   (core/rpush [this k v-or-vs]
     (let [vs' (util/vec-wrap v-or-vs)
