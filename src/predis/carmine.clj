@@ -207,7 +207,40 @@
     (car/wcar config (apply car/sunion (util/vec-wrap k-or-ks))))
 
   (sunionstore [this dest k-or-ks]
-    (car/wcar config (apply car/sunionstore dest (util/vec-wrap k-or-ks)))))
+    (car/wcar config (apply car/sunionstore dest (util/vec-wrap k-or-ks))))
+
+  (zadd [this k score m]
+    (core/zadd this k [[score m]]))
+
+  (zadd [this k kvs]
+    (car/wcar config (apply car/zadd k (apply concat kvs))))
+
+  (zcard [this k]
+    (car/wcar config (car/zcard k)))
+
+  (zcount [this k min-score max-score]
+    (car/wcar config (car/zcount k min-score max-score)))
+
+  (zincrby [this k increment m]
+    (car/wcar config (car/zincrby k increment m)))
+
+  ; ...
+
+  (zrangebyscore [this k min-score max-score]
+    (core/zrangebyscore this k min-score max-score {}))
+
+  ; TODO: support offset, count
+  (zrangebyscore [this k min-score max-score {:keys [withscores offset count]}]
+    (let [
+          ;withscores' (when withscores ["MATCH" match])
+          ]
+      (if withscores
+        (car/wcar config (car/zrangebyscore k min-score max-score "WITHSCORES"))
+        (car/wcar config (car/zrangebyscore k min-score max-score)))))
+
+  (zrank [this k m]
+    (car/wcar config (car/zrank k m)))
+  )
 
 (defn ->redis
   ([]

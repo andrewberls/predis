@@ -3,7 +3,10 @@
             [clojure.string :as string]
             (predis
               [core :as core]
-              [util :as util])))
+              [util :as util])
+            (predis.util
+              [list :as util.list]
+              [zset :as util.zset])))
 
 (def err-wrongtype
   "WRONGTYPE Operation against a key holding the wrong kind of value")
@@ -19,40 +22,27 @@
 
 ;;
 
+; Need to distinguish types internally, both represented
+; with Clojure maps
+(def empty-zset (with-meta {} {:predis/type "zset"}))
+(def empty-hash (with-meta {} {:predis/type "hash"}))
+
 (defn- set-at [redis k]
   (set (core/get redis k)))
+
+(defn- hash-at [redis k]
+  (or (core/get redis k) empty-hash))
+
+(defn- zset-at [redis k]
+  (or (core/get redis k) empty-zset))
 
 (defn- replace-seq
   "If s is a non-empty seq, replace it at key k in store
    Otherwise remove it from the store"
-  [store k s]
-  (if (seq s)
-    (swap! store assoc k s)
+  [store k xs]
+  (if (seq xs)
+    (swap! store assoc k xs)
     (swap! store dissoc k)))
-
-(defn normalized-start-idx
-  "Given an start idx which may be negative (indicating offset from the end)
-   or exceed the size of xs, return a normalized positive 0-based idx
-   See http://redis.io/commands/lrange"
-  [xs start]
-  (let [len (count xs)
-        last-idx (dec len)]
-    (cond
-      (< start (- len)) 0
-      (< start 0) (+ len start)
-      :else start)))
-
-(defn normalized-end-idx
-  "Given an end idx which may be negative (indicating offset from the end)
-   or exceed the size of xs, return a normalized positive 0-based idx
-   See http://redis.io/commands/lrange"
-  [xs end]
-  (let [len (count xs)
-        last-idx (dec len)]
-    (cond
-      (> end last-idx) last-idx
-      (< end 0) (+ len end)
-      :else end)))
 
 ;;
 
@@ -98,8 +88,10 @@
       (cond
         (string? x) "string"
         (set? x) "set"
+        (map? x) (let [t (:predis/type (meta x))]
+                   (assert t "Invalid metadata!")
+                   t)
         (sequential? x) "list"
-        (associative? x) "hash"
         :else "none")))
 
   (core/scan [this cursor]
@@ -197,7 +189,7 @@
     (if (core/hget this k f) 1 0))
 
   (core/hget [this k f]
-    (let [m (or (core/get this k) {})]
+    (let [m (hash-at this k)]
       (get m (str f))))
 
   (core/hgetall [this k]
@@ -205,9 +197,10 @@
       (apply concat (or vs []))))
 
   (core/hincrby [this k f increment]
-    (let [do-hincrby (fn [m]
-                       (let [old (Integer/parseInt (get m (str f) "0"))]
-                         (assoc m f (str (+ old increment)))))]
+    (let [do-hincrby (fn [old]
+                       (let [m (or old empty-hash)
+                             old-v (Integer/parseInt (get m (str f) "0"))]
+                         (assoc m f (str (+ old-v increment)))))]
       (swap! store update-in [k] do-hincrby)
       (Integer/parseInt (core/hget this k f))))
 
@@ -223,25 +216,25 @@
         []))
 
   (core/hlen [this k]
-    (let [m (or (core/get this k) {})]
+    (let [m (hash-at this k)]
       (count (keys m))))
 
   (core/hmget [this k f-or-fs]
-    (let [m (or (core/get this k) {})
+    (let [m (hash-at this k)
           fs' (util/vec-wrap f-or-fs)]
       (util/values-at m fs')))
 
   (core/hmset [this k kvs]
-    (let [kvs' (map (fn [[f v]] [(str f) (str v)]) kvs)
+    (let [kvs' (map util/stringify-tuple kvs)
           do-merge (fn [m]
                      (->> (concat (seq (or m {})) kvs')
-                          (into {})))]
+                          (into empty-hash)))]
       (swap! store update-in [k] do-merge)
       "OK"))
 
   (core/hset [this k f v]
-    (let [m (or (core/get this k) {})
-          do-hset (fn [old] (assoc (or old {}) (str f) (str v)))]
+    (let [m (hash-at this k)
+          do-hset (fn [old] (assoc (or old empty-hash) (str f) (str v)))]
       (if (contains? m f)
         (do
           (swap! store update-in [k] do-hset)
@@ -251,7 +244,7 @@
           1))))
 
   (core/hsetnx [this k f v]
-    (let [m (or (core/get this k) {})]
+    (let [m (hash-at this k)]
       (if (contains? m f)
         0
         (do
@@ -259,14 +252,14 @@
           1))))
 
   (core/hvals [this k]
-    (let [m (or (core/get this k) {})]
+    (let [m (hash-at this k)]
       (or (vals (sort m)) [])))
 
   ;; Lists
   (core/lindex [this k idx]
     (let [vs (vec (core/get this k))
           last-idx (dec (count vs))
-          idx' (normalized-end-idx vs idx)]
+          idx' (util.list/normalized-end-idx vs idx)]
       ; Differ from lrange here
       (when (<= idx last-idx)
         (get vs idx'))))
@@ -298,8 +291,8 @@
   (core/lrange [this k start stop]
     (let [vs (vec (core/get this k))
           last-idx (dec (count vs))
-          start' (normalized-start-idx vs start)
-          stop' (normalized-end-idx vs stop)
+          start' (util.list/normalized-start-idx vs start)
+          stop' (util.list/normalized-end-idx vs stop)
           indices (range start' (inc stop'))]
       (if (seq vs)
         (if (> start last-idx)
@@ -423,7 +416,76 @@
   (core/sunionstore [this dest k-or-ks]
     (let [union (core/sunion this k-or-ks)]
       (swap! store assoc dest union)
-      (core/scard this dest))))
+      (core/scard this dest)))
+
+  ; Sorted Sets
+  (core/zadd [this k score m]
+    (let [m' (str m)
+          zset (zset-at this k)
+          do-zadd (fn [_] (assoc zset m' (long score)))
+          ret (if (contains? zset m') 0 1)]
+      (swap! store update-in [k] do-zadd)
+      ret))
+
+  (core/zadd [this k kvs]
+    (reduce (fn [acc [score m]] (+ acc (core/zadd this k score m)))
+            0
+            kvs))
+
+  (zcard [this k]
+    (let [zset (zset-at this k)]
+      (count zset)))
+
+  (zcount [this k min-score max-score]
+    (->> (zset-at this k)
+         (util.zset/zrangebyscore min-score max-score)
+         count))
+
+  (zincrby [this k increment m]
+    (let [do-zincrby
+          (fn [old]
+            (let [zset (or old empty-zset)
+                  new-score (+ (get zset m 0.0) increment)]
+              (assoc zset m new-score)))]
+      (swap! store update-in [k] do-zincrby)
+      (str (get (core/get this k) m))))
+
+  ;;(zinterstore [this dest numkeys ks weights])
+  ;;(zlexcount [this k min-val max-val])
+  ;(zrange [this k start stop] [this k start stop opts])
+  ;;(zrangebylex [this k min-val max-val opts?])
+
+  (core/zrangebyscore [this k min-score max-score]
+    (core/zrangebyscore this k min-score max-score {}))
+
+  ; TODO: offset, count
+  (core/zrangebyscore [this k min-score max-score {:keys [withscores offset count]}]
+    (let [zset' (->> (zset-at this k)
+                     (util.zset/zrangebyscore min-score max-score)
+                     (map util/stringify-tuple))]
+      (if withscores
+        (apply concat zset')
+        (map first zset'))))
+
+  (zrank [this k m]
+    (let [zset (zset-at this k)]
+      (when (seq zset)
+        (let [vs (->> (util.zset/sort-zset zset)
+                      (mapv first))]
+          (.indexOf vs m)))))
+
+  ;(zrem [this k m-or-ms])
+  ;;(zremrangebylex [this k min-val max-val])
+  ;(zremrangebyscore [this k min-score max-score])
+  ;(zrevrange [this k start stop] [this k start stop opts])
+  ;(zrevrangebyscore [this k max-score min-score opts])
+  ;(zrevrank [this k m])
+  ;(zscore [this k m])
+  ;(zunionstore [dest numkeys ks weights])
+  ;;(zscan [this k cursor] [this k cursor opts])
+  )
+
+;;
 
 (defn ->redis
   ([]

@@ -107,4 +107,28 @@
   (sunionstore [this dest k-or-ks])
 
   ; Sorted Sets
+  (zadd [this k score m] [this k kvs]
+    "Add a single member with a given score, or a seq of
+     [score member] tuples
+     Ex:
+       (zadd \"my-zset\" 2 \"foo\")
+       (zadd \"my-zset\" [[2 \"foo\"] [3 \"bar\"]])")
+  (zcard [this k])
+  (zcount [this k min-score max-score])
+  (zincrby [this k increment m])
+  ;;(zinterstore [this dest numkeys ks weights])
+  ;;(zlexcount [this k min-val max-val])
+  ;(zrange [this k start stop] [this k start stop opts])
+  ;;(zrangebylex [this k min-val max-val opts?])
+  (zrangebyscore [this k min-score max-score] [this k min-score max-score opts])
+  (zrank [this k m])
+  ;(zrem [this k m-or-ms])
+  ;;(zremrangebylex [this k min-val max-val])
+  ;(zremrangebyscore [this k min-score max-score])
+  ;(zrevrange [this k start stop] [this k start stop opts])
+  ;(zrevrangebyscore [this k max-score min-score opts])
+  ;(zrevrank [this k m])
+  ;(zscore [this k m])
+  ;(zunionstore [dest numkeys ks weights])
+  ;;(zscan [this k cursor] [this k cursor opts])
   )

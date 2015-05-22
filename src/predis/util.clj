@@ -3,6 +3,9 @@
 (defn vec-wrap [v-or-vs]
   (if (sequential? v-or-vs) v-or-vs [v-or-vs]))
 
+(defn stringify-tuple [[a b]]
+  [(str a) (str b)])
+
 (defn values-at
   "Similar to (comp vals select-keys), but includes nil for missing keys
    Ex:
