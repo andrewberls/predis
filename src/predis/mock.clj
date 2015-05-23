@@ -5,7 +5,7 @@
               [core :as core]
               [util :as util])
             (predis.util
-              [list :as util.list]
+              [range :as util.range]
               [zset :as util.zset])))
 
 (def err-wrongtype
@@ -259,7 +259,7 @@
   (core/lindex [this k idx]
     (let [vs (vec (core/get this k))
           last-idx (dec (count vs))
-          idx' (util.list/normalized-end-idx vs idx)]
+          idx' (util.range/normalized-end-idx vs idx)]
       ; Differ from lrange here
       (when (<= idx last-idx)
         (get vs idx'))))
@@ -288,17 +288,12 @@
         (core/lpush this k v)
         (core/llen this k))))
 
-  (core/lrange [this k start stop]
-    (let [vs (vec (core/get this k))
-          last-idx (dec (count vs))
-          start' (util.list/normalized-start-idx vs start)
-          stop' (util.list/normalized-end-idx vs stop)
-          indices (range start' (inc stop'))]
-      (if (seq vs)
-        (if (> start last-idx)
-          []
-          (map (partial get vs) indices))
-        [])))
+  (core/lrange [this k start end]
+    (let [vs (vec (core/get this k))]
+      (if (or (empty? vs) (> start (dec (count vs))))
+        []
+        (->> (util.range/indices-for vs start end)
+             (map (partial get vs))))))
 
   (core/lrem [this k cnt v]
     (assert (number? cnt) err-badint)
@@ -452,7 +447,21 @@
 
   ;;(zinterstore [this dest numkeys ks weights])
   ;;(zlexcount [this k min-val max-val])
-  ;(zrange [this k start stop] [this k start stop opts])
+
+  (core/zrange [this k start end]
+    (core/zrange this k start end {}))
+
+  (core/zrange [this k start end {:keys [withscores]}]
+    (let [zset (vec (util.zset/sort-zset (zset-at this k)))]
+      (if (or (empty? zset) (> start (dec (count zset))))
+        []
+        (let [tups (->> (util.range/indices-for zset start end)
+                        (map (partial get zset))
+                        (map util/stringify-tuple))]
+          (if withscores
+            (apply concat tups)
+            (map first tups))))))
+
   ;;(zrangebylex [this k min-val max-val opts?])
 
   (core/zrangebyscore [this k min-score max-score]

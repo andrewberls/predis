@@ -70,7 +70,23 @@
 
 ;;(zinterstore [this dest numkeys ks weights])
 ;;(zlexcount [this k min-val max-val])
-;(zrange [this k start stop] [this k start stop opts])
+
+(defspec test-zrange
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs test-utils/gen-zset-kvs
+
+                   min-score gen/int
+                   max-score-incr gen/s-pos-int]
+      (test-utils/assert-zadd mock-client carmine-client k kvs)
+      (let [max-score (+ min-score max-score-incr)]
+        (is (= (r/zrange mock-client k min-score max-score)
+               (r/zrange carmine-client k min-score max-score)))
+        (is (= (r/zrange mock-client k min-score max-score {:withscores true})
+               (r/zrange carmine-client k min-score max-score {:withscores true})))
+        (test-utils/dbs-equal mock-client carmine-client)))))
+
 ;;(zrangebylex [this k min-val max-val opts?])
 
 (defspec test-zrangebyscore

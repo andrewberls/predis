@@ -224,7 +224,18 @@
   (zincrby [this k increment m]
     (car/wcar config (car/zincrby k increment m)))
 
-  ; ...
+  ;;(zinterstore [this dest numkeys ks weights])
+  ;;(zlexcount [this k min-val max-val])
+
+  (zrange [this k start stop]
+    (core/zrange this k start stop {}))
+
+  (zrange [this k start stop {:keys [withscores]}]
+    (if withscores
+      (car/wcar config (car/zrange k start stop "WITHSCORES"))
+      (car/wcar config (car/zrange k start stop))))
+
+  ;;(zrangebylex [this k min-val max-val opts?])
 
   (zrangebyscore [this k min-score max-score]
     (core/zrangebyscore this k min-score max-score {}))
@@ -240,6 +251,16 @@
 
   (zrank [this k m]
     (car/wcar config (car/zrank k m)))
+
+  ;(zrem [this k m-or-ms])
+  ;;(zremrangebylex [this k min-val max-val])
+  ;(zremrangebyscore [this k min-score max-score])
+  ;(zrevrange [this k start stop] [this k start stop opts])
+  ;(zrevrangebyscore [this k max-score min-score opts])
+  ;(zrevrank [this k m])
+  ;(zscore [this k m])
+  ;(zunionstore [dest numkeys ks weights])
+  ;;(zscan [this k cursor] [this k cursor opts])
   )
 
 (defn ->redis
