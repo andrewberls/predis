@@ -54,8 +54,6 @@
       (< end 0) (+ len end)
       :else end)))
 
-;;
-
 (deftype MockClient [store]
   core/IRedis
   ;; Keys
@@ -142,15 +140,20 @@
   (core/get [this k]
     (get @store (str k)))
 
-  (core/getrange [this k start end]
-    (let [string (core/get this k)
-          start' (normalized-start-idx string start)
-          end' (normalized-end-idx string end)]
-      (if (> start' end')
+  (core/getrange [this k start stop]
+    (let [s (or (core/get this k) "")
+         len (count s)
+         last-idx (dec len)
+
+         start' (normalized-start-idx s start)
+         stop' (cond
+                 (> stop last-idx) last-idx
+                 (< stop (- len)) 0 ; Only difference from normalized-end-idx
+                 (< stop 0) (+ len stop)
+                 :else stop)]
+      (if (or (empty? s) (> start last-idx) (> start' stop'))
         ""
-        (if (< (count string) end)
-          (subs string start' (count string))
-          (subs string start' (inc end'))))))
+        (subs s start' (inc stop')))))
 
   (core/incr [this k]
     (core/incrby this k 1))
