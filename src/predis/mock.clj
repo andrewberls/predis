@@ -458,9 +458,7 @@
         (let [tups (->> (util.range/indices-for zset start end)
                         (map (partial get zset))
                         (map util/stringify-tuple))]
-          (if withscores
-            (apply concat tups)
-            (map first tups))))))
+          (util.zset/zset-response tups withscores)))))
 
   ;;(zrangebylex [this k min-val max-val opts?])
 
@@ -469,12 +467,10 @@
 
   ; TODO: offset, count
   (core/zrangebyscore [this k min-score max-score {:keys [withscores offset count]}]
-    (let [zset' (->> (zset-at this k)
-                     (util.zset/zrangebyscore min-score max-score)
-                     (map util/stringify-tuple))]
-      (if withscores
-        (apply concat zset')
-        (map first zset'))))
+    (let [tups (->> (zset-at this k)
+                    (util.zset/zrangebyscore min-score max-score)
+                    (map util/stringify-tuple))]
+      (util.zset/zset-response tups withscores)))
 
   (zrank [this k m]
     (let [zset (zset-at this k)]
