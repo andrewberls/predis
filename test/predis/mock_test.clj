@@ -87,6 +87,12 @@
     (is (= "baz" (r/get redis "bar")))
     (is (= nil (r/get redis "fake-key")))))
 
+(deftest test-getrange
+  (let [redis (mock/->redis {"foo" "Petesta"})]
+    (is (= "") (r/getrange redis "foo" 4 2))
+    (is (= "Petesta") (r/getrange redis "foo" 0 100))
+    (is (= "Pete" (r/getrange redis "foo" 0 3)))))
+
 (deftest test-incr
   (let [redis (mock/->redis {"foo" "2"})]
     (r/incr redis "foo")
@@ -293,6 +299,13 @@
     (is (= nil (r/rpop redis "foo")))
     (is (= {} @(.store redis)))
     (is (= nil (r/rpop redis "fake-key")))))
+
+(deftest test-lset
+  (let [redis (mock/->redis {"foo" ["1" "2" "3"]})]
+    (r/lset redis "foo" 0 "5")
+    (r/lset redis "foo" -1 "9")
+    (is (= ["5" "2" "3"]) @(.store redis))
+    (is (= ["5" "2" "9"]) @(.store redis))))
 
 (deftest test-rpush
   (let [redis (mock/->redis {"foo" ["1" "2" "3"]})]

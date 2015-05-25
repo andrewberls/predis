@@ -5,14 +5,17 @@
               [core :as core]
               [util :as util])))
 
-(def err-wrongtype
-  "WRONGTYPE Operation against a key holding the wrong kind of value")
-
 (def err-badint
  "ERR value is not an integer or out of range")
 
+(def err-indexrange
+  "ERR index out of range")
+
 (def err-srcdest
  "ERR source and destination objects are the same")
+
+(def err-wrongtype
+  "WRONGTYPE Operation against a key holding the wrong kind of value")
 
 (defn err-arity [cmd]
   (format "ERR wrong number of arguments for %s" cmd))
@@ -141,6 +144,21 @@
 
   (core/get [this k]
     (get @store (str k)))
+
+  (core/getrange [this k start stop]
+    (let [s (or (core/get this k) "")
+         len (count s)
+         last-idx (dec len)
+
+         start' (normalized-start-idx s start)
+         stop' (cond
+                 (> stop last-idx) last-idx
+                 (< stop (- len)) 0 ; Only difference from normalized-end-idx
+                 (< stop 0) (+ len stop)
+                 :else stop)]
+      (if (or (empty? s) (> start last-idx) (> start' stop'))
+        ""
+        (subs s start' (inc stop')))))
 
   (core/incr [this k]
     (core/incrby this k 1))
@@ -327,6 +345,14 @@
               vs' (butlast vs)]
           (replace-seq store k vs')
           v))))
+
+  (core/lset [this k idx v]
+    (let [vs (vec (core/get this k))
+          idx' (normalized-end-idx vs idx)
+          vs' (assoc vs idx' v)]
+      (assert (< idx' (count vs)) err-indexrange)
+      (swap! store assoc k vs')
+      "OK"))
 
   (core/rpush [this k v-or-vs]
     (let [vs' (util/vec-wrap v-or-vs)
