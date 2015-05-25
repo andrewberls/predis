@@ -91,7 +91,17 @@
         (is (= (r/lrem mock-client k cnt v) (r/lrem carmine-client k cnt v)))
         (test-utils/dbs-equal mock-client carmine-client)))))
 
-;;(defspec test-lset)
+(defspec test-lset
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))
+                   v gen/string-alphanumeric]
+    (let [idx (rand-int (count vs))]
+      (test-utils/assert-rpush mock-client carmine-client k vs)
+      (is (= (r/lset mock-client k idx v) (r/lset carmine-client k idx v)))
+      (test-utils/dbs-equal mock-client carmine-client)))))
+
 ;;(defspec test-ltrim)
 
 (defspec test-rpop
