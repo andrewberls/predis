@@ -127,7 +127,7 @@
              (r/get carmine-client k))))))
 
 (defspec test-getrange
-  200
+  10
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    s gen/string-alphanumeric
