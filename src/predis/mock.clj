@@ -57,6 +57,8 @@
       (< end 0) (+ len end)
       :else end)))
 
+;;
+
 (deftype MockClient [store]
   core/IRedis
   ;; Keys
