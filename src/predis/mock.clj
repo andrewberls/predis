@@ -134,6 +134,11 @@
   (core/get [this k]
     (get @store (str k)))
 
+  (core/getset [this k v]
+    (when-let [old (core/get this k)]
+      (core/set this k v)
+      old))
+
   (core/incr [this k]
     (core/incrby this k 1))
 

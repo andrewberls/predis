@@ -36,7 +36,7 @@
   (get [this k])
   ;(getbit [this k offset])
   ;(getrange [this k start end])
-  ;(getset [this k v])
+  (getset [this k v])
   (incr [this k])
   (incrby [this k increment])
   (incrbyfloat [this k increment])
@@ -49,7 +49,7 @@
   ;(setbit [this k offset v])
   ;(setex [this k seconds v])
   (setnx [this k v])
-  ;(setrnage [this k offset v])
+  ;(setrange [this k offset v])
   (strlen [this k])
 
   ; Hashes

@@ -68,6 +68,9 @@
   (core/get [this k]
     (car/wcar config (car/get k)))
 
+  (core/getset [this k v]
+    (car/wcar config (car/getset k v)))
+
   (core/incr [this k]
     (car/wcar config (car/incr k)))
 

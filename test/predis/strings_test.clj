@@ -44,6 +44,16 @@
       (is (= (r/get mock-client k)
              (r/get carmine-client k))))))
 
+(defspec test-getset
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   v gen/string-alphanumeric]
+      (test-utils/assert-set mock-client carmine-client k v)
+      (is (= (r/getset mock-client k v)
+             (r/getset carmine-client k v)))
+      (test-utils/dbs-equal mock-client carmine-client))))
+
 (defspec test-incrby
   10
   (let [mock-client (mock/->redis)]
