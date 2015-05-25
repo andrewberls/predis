@@ -345,7 +345,7 @@
     (let [vs (vec (core/get this k))
           idx' (normalized-end-idx vs idx)
           vs' (assoc vs idx' v)]
-      (assert (< idx' (count vs) "Err index out of range"))
+      (assert (< idx' (count vs)) "Err index out of range")
       (swap! store assoc k vs')
       "OK"))
 
