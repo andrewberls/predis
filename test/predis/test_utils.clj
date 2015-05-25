@@ -28,7 +28,7 @@
     gen-ne-str   ; Field
     gen-ne-str)) ; Value
 
-(def gen-zset-kvs
+(def gen-kvs-vec
   (gen/not-empty
     (gen/vector (gen/tuple
                    gen/int        ; Score

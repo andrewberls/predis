@@ -76,9 +76,22 @@
       (is (= (r/incrby mock-client k increment) (r/incrby carmine-client k increment)))
       (test-utils/dbs-equal mock-client carmine-client))))
 
-;(defspec test-mget)
+(defspec test-mget
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [kvs test-utils/gen-kvs-vec]
+      (is (= (r/mset mock-client kvs) (r/mset carmine-client kvs)))
+      (let [num-keys (inc (rand-int (count kvs)))
+            ks (take num-keys (map first kvs))]
+        (is (= (r/mget mock-client ks) (r/mget carmine-client ks)))
+        (test-utils/dbs-equal mock-client carmine-client)))))
 
-;(defspec test-mset)
+(defspec test-mset
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [kvs test-utils/gen-kvs-vec]
+      (is (= (r/mset mock-client kvs) (r/mset carmine-client kvs)))
+      (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-strlen
   10

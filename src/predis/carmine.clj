@@ -87,8 +87,7 @@
     (car/wcar config (apply car/mget ks)))
 
   (core/mset [this kvs]
-    ; TODO
-    )
+    (car/wcar config (apply car/mset (apply concat kvs))))
 
   (core/set [this k v]
     (car/wcar config (car/set k v)))

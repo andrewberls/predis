@@ -175,10 +175,10 @@
     (core/get this k)))
 
   (core/mget [this ks]
-    (util/values-at @store ks))
+    (util/values-at @store (map str ks)))
 
   (core/mset [this kvs]
-    (assert (even? (count kvs)) (err-arity "MSET"))
+    (assert (even? (count (flatten kvs))) (err-arity "MSET"))
     (doseq [[k v] kvs]
       (core/set this k v))
     "OK")

@@ -28,7 +28,7 @@
   10
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
-                   kvs test-utils/gen-zset-kvs]
+                   kvs test-utils/gen-kvs-vec]
       (is (= (r/zadd mock-client k kvs) (r/zadd carmine-client k kvs)))
       (test-utils/dbs-equal mock-client carmine-client))))
 
@@ -36,7 +36,7 @@
   10
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
-                   kvs test-utils/gen-zset-kvs]
+                   kvs test-utils/gen-kvs-vec]
       (test-utils/assert-zadd mock-client carmine-client k kvs)
       (is (= (r/zcard mock-client k) (r/zcard carmine-client k)))
       (test-utils/dbs-equal mock-client carmine-client))))
@@ -45,7 +45,7 @@
   10
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
-                   kvs test-utils/gen-zset-kvs
+                   kvs test-utils/gen-kvs-vec
 
                    min-score gen/int
                    max-score-incr gen/s-pos-int]
@@ -59,7 +59,7 @@
   10
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
-                   kvs test-utils/gen-zset-kvs
+                   kvs test-utils/gen-kvs-vec
 
                    increment gen/int]
       (test-utils/assert-zadd mock-client carmine-client k kvs)
@@ -75,7 +75,7 @@
   10
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
-                   kvs test-utils/gen-zset-kvs
+                   kvs test-utils/gen-kvs-vec
 
                    min-score gen/int
                    max-score-incr gen/s-pos-int]
@@ -93,7 +93,7 @@
   10
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
-                   kvs test-utils/gen-zset-kvs
+                   kvs test-utils/gen-kvs-vec
 
                    min-score gen/int
                    max-score-incr gen/s-pos-int]
@@ -113,7 +113,7 @@
   10
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
-                   kvs test-utils/gen-zset-kvs]
+                   kvs test-utils/gen-kvs-vec]
       (test-utils/assert-zadd mock-client carmine-client k kvs)
       (let [m (second (first (shuffle kvs)))]
         (is (= (r/zrank mock-client k m)
