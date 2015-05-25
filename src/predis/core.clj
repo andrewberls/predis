@@ -28,18 +28,29 @@
 
   ; Strings
   (append [this k v])
+  ;(bitcount [this k] [this k start end])
+  ;(bitop [this op dest k-or-ks])
+  ;(bitpos [this k bit] [this k bit start] [this k bit start end])
   (decr [this k])
   (decrby [this k decrement])
   (get [this k])
   (getrange [this k start end])
+  ;(getbit [this k offset])
+  ;(getrange [this k start end])
+  ;(getset [this k v])
   (incr [this k])
   (incrby [this k increment])
   (incrbyfloat [this k increment])
   (mget [this ks])
   (mset [this kvs]
     "Ex: (mset [[\"foo\" \"1\"] [\"bar\" \"2\"]])")
-  (set [this k v])
+  ;(msetnx [this kvs])
+  ;(psetex [this k ms v])
+  (set [this k v]) ; TODO: [this k v opts]
+  ;(setbit [this k offset v])
+  ;(setex [this k seconds v])
   (setnx [this k v])
+  ;(setrnage [this k offset v])
   (strlen [this k])
 
   ; Hashes
