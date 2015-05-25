@@ -5,14 +5,17 @@
               [core :as core]
               [util :as util])))
 
-(def err-wrongtype
-  "WRONGTYPE Operation against a key holding the wrong kind of value")
-
 (def err-badint
  "ERR value is not an integer or out of range")
 
+(def err-indexrange
+  "ERR index out of range")
+
 (def err-srcdest
  "ERR source and destination objects are the same")
+
+(def err-wrongtype
+  "WRONGTYPE Operation against a key holding the wrong kind of value")
 
 (defn err-arity [cmd]
   (format "ERR wrong number of arguments for %s" cmd))
@@ -345,7 +348,7 @@
     (let [vs (vec (core/get this k))
           idx' (normalized-end-idx vs idx)
           vs' (assoc vs idx' v)]
-      (assert (< idx' (count vs)) "Err index out of range")
+      (assert (< idx' (count vs)) err-indexrange)
       (swap! store assoc k vs')
       "OK"))
 
