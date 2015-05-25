@@ -43,7 +43,7 @@
   (mget [this ks])
   (mset [this kvs]
     "Ex: (mset [[\"foo\" \"1\"] [\"bar\" \"2\"]])")
-  ;(msetnx [this kvs])
+  (msetnx [this kvs])
   ;(psetex [this k ms v])
   (set [this k v]) ; TODO: [this k v opts]
   ;(setbit [this k offset v])

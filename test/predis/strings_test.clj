@@ -93,6 +93,16 @@
       (is (= (r/mset mock-client kvs) (r/mset carmine-client kvs)))
       (test-utils/dbs-equal mock-client carmine-client))))
 
+(defspec test-msetnx
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [kvs test-utils/gen-kvs-vec]
+      (let [existing-k (ffirst kvs)]
+        (is (= (r/msetnx mock-client kvs) (r/msetnx carmine-client kvs)))
+        (is (= (r/msetnx mock-client [[existing-k "foo"]])
+               (r/msetnx carmine-client [[existing-k "foo"]])))
+        (test-utils/dbs-equal mock-client carmine-client)))))
+
 (defspec test-strlen
   10
   (let [mock-client (mock/->redis)]

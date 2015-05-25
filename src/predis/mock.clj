@@ -183,6 +183,15 @@
       (core/set this k v))
     "OK")
 
+  (core/msetnx [this kvs]
+    (assert (even? (count (flatten kvs))) (err-arity "MSETNX"))
+    (let [key-missing? (fn [[k v]] (nil? (core/get this k)))]
+      (if (every? key-missing? kvs)
+        (do
+          (core/mset this kvs)
+          1)
+        0)))
+
   (core/set [this k v]
     (swap! store assoc (str k) (str v))
     "OK")
