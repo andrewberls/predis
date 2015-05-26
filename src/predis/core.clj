@@ -78,7 +78,7 @@
 
   ; Lists
   (lindex [this k idx])
-  ;(linsert [k pos pivot v])
+  (linsert [this k pos pivot v])
   (llen [this k])
   (lpop [this k])
   (lpush [this k v-or-vs]
