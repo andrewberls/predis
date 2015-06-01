@@ -16,7 +16,7 @@
 (use-fixtures :each test-utils/flush-redis)
 
 (defspec test-lindex
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))
@@ -26,7 +26,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-linsert
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/string-alphanumeric))
@@ -39,7 +39,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-llen
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))]
@@ -48,7 +48,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-lpop
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    fake-key gen/string-alphanumeric
@@ -60,7 +60,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-lpush
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))]
@@ -68,7 +68,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-lpushx
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k1 gen/string-alphanumeric
                    k2 gen/string-alphanumeric
@@ -80,7 +80,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-lrange
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))
@@ -92,7 +92,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-lrem
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))
@@ -103,7 +103,7 @@
         (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-lset
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))
@@ -116,7 +116,7 @@
 ;;(defspec test-ltrim)
 
 (defspec test-rpop
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    fake-key gen/string-alphanumeric
@@ -128,7 +128,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-rpush
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))]

@@ -10,6 +10,8 @@
               [core :as r]
               [carmine :as predis.carmine])))
 
+(def nruns 20)
+
 (def redis-config
   {:pool {}
    :spec {:host "127.0.0.1" :port 6379}})

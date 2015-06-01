@@ -16,7 +16,7 @@
 (use-fixtures :each test-utils/flush-redis)
 
 (defspec test-sadd
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k1 gen/string-alphanumeric
                    v gen/int
@@ -27,7 +27,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-scard
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))]
@@ -36,7 +36,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-sdiff
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k1 gen/string-alphanumeric
                    vs1 (gen/not-empty (gen/vector gen/int))
@@ -50,7 +50,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-sdiffstore
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [src gen/string-alphanumeric
                    dest gen/string-alphanumeric
@@ -60,7 +60,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-sinter
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k1 gen/string-alphanumeric
                    vs1 (gen/not-empty (gen/vector gen/int))
@@ -74,7 +74,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-sinterstore
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [src gen/string-alphanumeric
                    dest gen/string-alphanumeric
@@ -84,7 +84,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-sismember
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))]
@@ -95,7 +95,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-smembers
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))]
@@ -104,7 +104,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-smove
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k1 gen/string-alphanumeric
                    k2 gen/string-alphanumeric
@@ -122,7 +122,7 @@
       (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-srem
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    vs (gen/not-empty (gen/vector gen/int))]
@@ -133,7 +133,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-sunion
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k1 gen/string-alphanumeric
                    vs1 (gen/not-empty (gen/vector gen/int))
@@ -147,7 +147,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-sunionstore
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [src gen/string-alphanumeric
                    dest gen/string-alphanumeric

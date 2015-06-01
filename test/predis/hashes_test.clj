@@ -16,7 +16,7 @@
 (use-fixtures :each test-utils/flush-redis)
 
 (defspec test-hdel
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty (gen/vector test-utils/gen-hash-kv))]
@@ -27,7 +27,7 @@
         (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-hexists
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty (gen/vector test-utils/gen-hash-kv))]
@@ -38,7 +38,7 @@
         (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-hget
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty (gen/vector test-utils/gen-hash-kv))]
@@ -51,7 +51,7 @@
         (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-hgetall
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty (gen/vector test-utils/gen-hash-kv))]
@@ -60,7 +60,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-hincrby
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty
@@ -79,7 +79,7 @@
         (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-hkeys
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty (gen/vector test-utils/gen-hash-kv))]
@@ -87,7 +87,7 @@
       (is (= (sort (r/hkeys mock-client k)) (sort (r/hkeys carmine-client k)))))))
 
 (defspec test-hlen
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty (gen/vector test-utils/gen-hash-kv))]
@@ -97,7 +97,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-hmget
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty (gen/vector test-utils/gen-hash-kv))
@@ -109,7 +109,7 @@
         (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-hmset
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty (gen/vector test-utils/gen-hash-kv))]
@@ -117,7 +117,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-hset
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    f (gen/not-empty gen/string-alphanumeric)
@@ -126,7 +126,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-hsetnx
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    f (gen/not-empty gen/string-alphanumeric)
@@ -137,7 +137,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-hvals
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs (gen/not-empty (gen/vector test-utils/gen-hash-kv))]

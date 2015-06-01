@@ -16,7 +16,7 @@
 (use-fixtures :each test-utils/flush-redis)
 
 (defspec test-dbsize
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k1 (gen/not-empty gen/string-alphanumeric)
                    v1 gen/string-alphanumeric

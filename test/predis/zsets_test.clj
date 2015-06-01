@@ -16,7 +16,7 @@
 (use-fixtures :each test-utils/flush-redis)
 
 (defspec test-zadd-one
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    score gen/int
@@ -25,7 +25,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-zadd-many
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs test-utils/gen-kvs-vec]
@@ -33,7 +33,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-zcard
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs test-utils/gen-kvs-vec]
@@ -42,7 +42,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-zcount
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs test-utils/gen-kvs-vec
@@ -56,7 +56,7 @@
         (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-zincrby
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs test-utils/gen-kvs-vec
@@ -72,7 +72,7 @@
 ;;(zlexcount [this k min-val max-val])
 
 (defspec test-zrange
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs test-utils/gen-kvs-vec
@@ -90,7 +90,7 @@
 ;;(zrangebylex [this k min-val max-val opts?])
 
 (defspec test-zrangebyscore
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs test-utils/gen-kvs-vec
@@ -110,7 +110,7 @@
         (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-zrank
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    kvs test-utils/gen-kvs-vec]
