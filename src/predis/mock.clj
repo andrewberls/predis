@@ -17,6 +17,9 @@
 (def err-srcdest
  "ERR source and destination objects are the same")
 
+(def err-syntax
+  "ERR syntax error")
+
 (def err-wrongtype
   "WRONGTYPE Operation against a key holding the wrong kind of value")
 
@@ -295,6 +298,22 @@
       ; Differ from lrange here
       (when (<= idx last-idx)
         (get vs idx'))))
+
+  (core/linsert [this k pos pivot v]
+    (let [vs (vec (core/get this k))
+          pos' (string/lower-case pos)]
+      (assert (#{"before" "after"} pos') err-syntax)
+      (if (seq vs)
+        (if (contains? (set vs) pivot)
+          (let [split-idx (if (= pos' "before")
+                            (.indexOf vs pivot)
+                            (inc (.indexOf vs pivot)))
+                [before after] (split-at split-idx vs)
+                vs' (concat before [(str v)] after)]
+            (swap! store assoc k vs')
+            (core/llen this k))
+         -1)
+        0)))
 
   (core/llen [this k]
     (count (core/get this k)))

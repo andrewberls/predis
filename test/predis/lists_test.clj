@@ -25,7 +25,18 @@
       (is (= (r/lindex mock-client k idx) (r/lindex carmine-client k idx)))
       (test-utils/dbs-equal mock-client carmine-client))))
 
-;(defspec test-linsert)
+(defspec test-linsert
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/string-alphanumeric))
+                   pos (gen/elements ["Before" "After"])
+                   pivot gen/string-alphanumeric
+                   v gen/int]
+      (test-utils/assert-rpush mock-client carmine-client k vs)
+      (is (= (r/linsert mock-client k pos pivot v)
+             (r/linsert carmine-client k pos pivot v)))
+      (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-llen
   10

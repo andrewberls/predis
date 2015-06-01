@@ -145,6 +145,9 @@
   (core/lindex [this k idx]
     (car/wcar config (car/lindex k idx)))
 
+  (core/linsert [this k pos pivot v]
+    (car/wcar config (car/linsert k pos pivot v)))
+
   (core/llen [this k]
     (car/wcar config (car/llen k)))
 
