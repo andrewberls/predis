@@ -291,17 +291,19 @@
         (get vs idx'))))
 
   (core/linsert [this k pos pivot v]
-    (assert (or (= pos "before") (= pos "after")) err-syntax)
-    (let [vs (vec (core/get this k))]
-      (if (not (seq vs))
-        0
+    (let [vs (vec (core/get this k))
+          pos' (string/lower-case pos)]
+      (assert (#{"before" "after"} pos') err-syntax)
+      (if (seq vs)
         (if (contains? (set vs) pivot)
-          (let [[before after] (split-at ((if (= pos "before") util/id inc)
-                                            (.indexOf vs pivot)) vs)
-                vs' (vec (flatten (concat before [(str v)] after)))]
+          (let [[before after] (split-at (if (= pos' "before")
+                                           (.indexOf vs pivot)
+                                           (inc (.indexOf vs pivot))) vs)
+                 vs' (vec (flatten (concat before [(str v)] after)))]
             (swap! store assoc k vs')
             (core/llen this k))
-          -1))))
+         -1)
+        0)))
 
   (core/llen [this k]
     (count (core/get this k)))

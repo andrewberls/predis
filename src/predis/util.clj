@@ -1,7 +1,5 @@
 (ns predis.util)
 
-(defn id [x] x)
-
 (defn vec-wrap [v-or-vs]
   (if (sequential? v-or-vs) v-or-vs [v-or-vs]))
 
