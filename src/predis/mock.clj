@@ -299,7 +299,7 @@
           (let [[before after] (split-at (if (= pos' "before")
                                            (.indexOf vs pivot)
                                            (inc (.indexOf vs pivot))) vs)
-                 vs' (vec (flatten (concat before [(str v)] after)))]
+                 vs' (concat before [(str v)] after)]
             (swap! store assoc k vs')
             (core/llen this k))
          -1)
