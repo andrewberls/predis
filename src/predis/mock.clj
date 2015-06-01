@@ -293,21 +293,12 @@
   (core/linsert [this k pos pivot v]
     (assert (or (= pos "before") (= pos "after")) err-syntax)
     (let [vs (vec (core/get this k))]
-      (if (seq vs)
+      (if (not (seq vs))
         0
         (if (contains? (set vs) pivot)
-          ;((if (= pos "before") inc) (split-at))
-          (let [
-                [before after] (split-at ((if (= pos "before") inc util/id)
+          (let [[before after] (split-at ((if (= pos "before") util/id inc)
                                             (.indexOf vs pivot)) vs)
-                               ;(split-at (+ (.indexOf vs pivot) pos') vs
-                               ;        (if (= pos "before")
-                               ;          0))
-                ;vs' (concat before [(str v)] after)]
-                ;vs' (mapv vec (concat before [(str v)] after))]
                 vs' (vec (flatten (concat before [(str v)] after)))]
-            (println "k:" k)
-            (println "pos:" pos "vs:" vs "vs':" vs')
             (swap! store assoc k vs')
             (core/llen this k))
           -1))))
