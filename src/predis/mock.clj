@@ -296,10 +296,10 @@
       (assert (#{"before" "after"} pos') err-syntax)
       (if (seq vs)
         (if (contains? (set vs) pivot)
-          (let [[before after]
-                (split-at (if (= pos' "before")
+          (let [split-idx (if (= pos' "before")
                             (.indexOf vs pivot)
-                            (inc (.indexOf vs pivot))) vs)
+                            (inc (.indexOf vs pivot)))
+                [before after] (split-at split-idx vs)
                  vs' (concat before [(str v)] after)]
             (swap! store assoc k vs')
             (core/llen this k))
