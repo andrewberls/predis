@@ -300,7 +300,7 @@
                             (.indexOf vs pivot)
                             (inc (.indexOf vs pivot)))
                 [before after] (split-at split-idx vs)
-                 vs' (concat before [(str v)] after)]
+                vs' (concat before [(str v)] after)]
             (swap! store assoc k vs')
             (core/llen this k))
          -1)
