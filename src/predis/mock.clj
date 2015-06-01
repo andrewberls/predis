@@ -297,8 +297,8 @@
       (if (seq vs)
         (if (contains? (set vs) pivot)
           (let [[before after] (split-at (if (= pos' "before")
-                                           (.indexOf vs pivot)
-                                           (inc (.indexOf vs pivot))) vs)
+                (.indexOf vs pivot)
+                (inc (.indexOf vs pivot))) vs)
                  vs' (concat before [(str v)] after)]
             (swap! store assoc k vs')
             (core/llen this k))
