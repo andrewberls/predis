@@ -16,7 +16,7 @@
 (use-fixtures :each test-utils/flush-redis)
 
 (defspec test-del
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [k gen/string-alphanumeric
                    v gen/string-alphanumeric]
@@ -26,7 +26,7 @@
       (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-rename
-  10
+  test-utils/nruns
   (let [mock-client (mock/->redis)]
     (prop/for-all [v gen/string-alphanumeric]
       (let [k1 (str (java.util.UUID/randomUUID))
