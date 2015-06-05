@@ -375,6 +375,17 @@
       (swap! store assoc k vs')
       "OK"))
 
+  (core/ltrim [this k start stop]
+    (if > (start stop)
+      []
+    (let [vs (core/get this k)
+          index-range (util.range/indices-for vs start stop)
+          start' (take 1 index-range)
+          stop' (take-last 1 index-range)
+          vs' (subvec vs start' (inc stop'))
+          ]
+      (swap! store assoc k vs'))))
+
   (core/rpush [this k v-or-vs]
     (let [vs' (util/vec-wrap v-or-vs)
           do-push (fn [old-vs] (concat (or old-vs []) (map str vs')))]

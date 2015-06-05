@@ -113,7 +113,14 @@
       (is (= (r/lset mock-client k idx v) (r/lset carmine-client k idx v)))
       (test-utils/dbs-equal mock-client carmine-client)))))
 
-;;(defspec test-ltrim)
+(defspec test-ltrim
+  10
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k (gen/not-empty (gen/vector gen/int))
+                   start gen/int
+                   stop gen/int]
+      (is (= (r/ltrim mock-client k start stop) (r/ltrim carmine-client k start stop)))
+      (test-utils/dbs-equal mock-client carmine-client))))
 
 (defspec test-rpop
   10
