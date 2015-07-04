@@ -359,6 +359,15 @@
           nremoved)
         0)))
 
+  (core/ltrim [this k start stop]
+    (if (> start stop)
+      []
+      (when-let [vs (seq (core/get this k))]
+        (let [[start' stop'] (util.range/indices-for vs start stop)
+              vs' (subvec vs start' (inc stop'))]
+      (swap! store assoc k vs'))))
+    "OK")
+
   (core/rpop [this k]
     (let [vs (core/get this k)]
       (when (seq vs)

@@ -88,7 +88,7 @@
   (lrange [this k start end])
   (lrem [this k cnt v])
   (lset [this k idx v])
-  ;(ltrim [this k start stop])
+  (ltrim [this k start stop])
   (rpop [this k])
   ;(rpoplpush [this src dest])
   (rpush [this k v-or-vs]

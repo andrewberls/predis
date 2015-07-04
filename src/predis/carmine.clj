@@ -169,6 +169,9 @@
   (core/lset [this k idx v]
     (car/wcar config (car/lset k idx v)))
 
+  (core/ltrim [this k start stop]
+    (car/wcar config (car/ltrim k start stop)))
+
   (core/rpop [this k]
     (car/wcar config (car/rpop k)))
 
