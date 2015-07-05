@@ -116,16 +116,40 @@
                    kvs test-utils/gen-kvs-vec]
       (test-utils/assert-zadd mock-client carmine-client k kvs)
       (let [m (second (first (shuffle kvs)))]
-        (is (= (r/zrank mock-client k m)
-               (r/zrank carmine-client k m)))
+        (is (= (r/zrank mock-client k m) (r/zrank carmine-client k m)))
+        (is (= (r/zrank mock-client k ["fake-member"]) (r/zrank carmine-client k ["fake-member"])))
+        (is (= (r/zrank mock-client "fake-key" m) (r/zrank carmine-client "fake-key" m)))
         (test-utils/dbs-equal mock-client carmine-client)))))
 
-;(zrem [this k m-or-ms])
+(defspec test-zrem
+  test-utils/nruns
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs test-utils/gen-kvs-vec]
+      (test-utils/assert-zadd mock-client carmine-client k kvs)
+      (let [num-members (inc (rand-int (dec (count kvs))))
+            ms (map second (take num-members (shuffle kvs)))]
+        (is (= (r/zrem mock-client k ms) (r/zrem carmine-client k ms)))
+        (is (= (r/zrem mock-client k ["fake-member"]) (r/zrem carmine-client k ["fake-member"])))
+        (is (= (r/zrem mock-client "fake-key" ms) (r/zrem carmine-client "fake-key" ms)))
+        (test-utils/dbs-equal mock-client carmine-client)))))
+
 ;;(zremrangebylex [this k min-val max-val])
 ;(zremrangebyscore [this k min-score max-score])
 ;(zrevrange [this k start stop] [this k start stop opts])
 ;(zrevrangebyscore [this k max-score min-score opts])
-;(zrevrank [this k m])
+
+(defspec test-zrevrank
+  test-utils/nruns
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs test-utils/gen-kvs-vec]
+      (test-utils/assert-zadd mock-client carmine-client k kvs)
+      (let [m (second (first (shuffle kvs)))]
+        (is (= (r/zrevrank mock-client k m) (r/zrevrank carmine-client k m)))
+        (is (= (r/zrevrank mock-client k ["fake-member"]) (r/zrevrank carmine-client k ["fake-member"])))
+        (is (= (r/zrevrank mock-client "fake-key" m) (r/zrevrank carmine-client "fake-key" m)))
+        (test-utils/dbs-equal mock-client carmine-client)))))
 
 (defspec test-zscore
   test-utils/nruns

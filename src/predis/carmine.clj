@@ -272,12 +272,16 @@
   (zrank [this k m]
     (car/wcar config (car/zrank k m)))
 
-  ;(zrem [this k m-or-ms])
+  (zrem [this k m-or-ms]
+    (car/wcar config (apply car/zrem k (util/vec-wrap m-or-ms))))
+
   ;;(zremrangebylex [this k min-val max-val])
   ;(zremrangebyscore [this k min-score max-score])
   ;(zrevrange [this k start stop] [this k start stop opts])
   ;(zrevrangebyscore [this k max-score min-score opts])
-  ;(zrevrank [this k m])
+
+  (zrevrank [this k m]
+    (car/wcar config (car/zrevrank k m)))
 
   (zscore [this k m]
     (car/wcar config (car/zscore k m)))

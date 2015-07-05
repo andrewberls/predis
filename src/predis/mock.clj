@@ -550,15 +550,34 @@
   (zrank [this k m]
     (when-let [zset (seq (zset-at this k))]
       (let [vs (->> (util.zset/sort-zset zset)
-                    (mapv first))]
-        (.indexOf vs m))))
+                    (mapv first))
+            idx (.indexOf vs m)]
+        (when (>= idx 0)
+          idx))))
 
-  ;(zrem [this k m-or-ms])
+  (zrem [this k m-or-ms]
+    (let [zset (zset-at this k)]
+      (if (seq zset)
+        (let [[zset' nremoved] (->> (util/vec-wrap m-or-ms)
+                                    (util/counting-dissoc zset))]
+          (replace-seq store k zset')
+          nremoved)
+        0)))
+
   ;;(zremrangebylex [this k min-val max-val])
   ;(zremrangebyscore [this k min-score max-score])
   ;(zrevrange [this k start stop] [this k start stop opts])
   ;(zrevrangebyscore [this k max-score min-score opts])
-  ;(zrevrank [this k m])
+
+  (zrevrank [this k m]
+    (when-let [zset (seq (zset-at this k))]
+      (let [vs (->> (util.zset/sort-zset zset)
+                    (map first)
+                    reverse
+                    vec)
+            idx (.indexOf vs m)]
+        (when (>= idx 0)
+          idx))))
 
   (zscore [this k m]
     (let [zset (zset-at this k)]
