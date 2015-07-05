@@ -71,6 +71,7 @@
   (hmset [this k kvs]
     "Ex:
        (hmset \"my-hash\" [[\"field-a\" \"val-a\"] [\"field-b\" \"val-b\"]])")
+  ;(hscan [this k cursor] [this k cursor opts]
   (hset [this k f v])
   (hsetnx [this k f v])
   (hvals [this k])
@@ -85,12 +86,12 @@
        (lpush \"my-list\" 2)
        (lpush \"my-list\" [1 2 3 4])")
   (lpushx [this k v])
-  (lrange [this k start end])
+  (lrange [this k start stop])
   (lrem [this k cnt v])
   (lset [this k idx v])
   (ltrim [this k start stop])
   (rpop [this k])
-  ;(rpoplpush [this src dest])
+  (rpoplpush [this src dest])
   (rpush [this k v-or-vs]
     "Ex:
        (rpush \"my-list\" 2)
@@ -113,6 +114,7 @@
   (spop [this k])
   (srandmember [this k] [this k cnt])
   (srem [this k m-or-ms])
+  ;(sscan [this k cursor] [this k cursor opts]
   (sunion [this k-or-ks])
   (sunionstore [this dest k-or-ks])
 
@@ -128,7 +130,7 @@
   (zincrby [this k increment m])
   ;;(zinterstore [this dest numkeys ks weights])
   ;;(zlexcount [this k min-val max-val])
-  (zrange [this k start end] [this k start end opts])
+  (zrange [this k start stop] [this k start stop opts])
   ;;(zrangebylex [this k min-val max-val opts?])
   (zrangebyscore [this k min-score max-score] [this k min-score max-score opts])
   (zrank [this k m])

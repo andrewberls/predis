@@ -16,25 +16,25 @@
       (< start 0) (+ len start)
       :else start)))
 
-(defn normalized-end-idx
-  "Given an end idx which may be negative (indicating offset from the end)
+(defn normalized-stop-idx
+  "Given a stop idx which may be negative (indicating offset from the end)
    or exceed the size of xs, return a normalized positive 0-based idx
 
-   Semantics for end differ from start - e.g. LRANGE specifies that
-   end > last-idx = treat like last idx"
-  [xs end]
+   Semantics for stop differ from start - e.g. LRANGE specifies that
+   stop > last-idx = treat like last idx"
+  [xs stop]
   (let [len (count xs)
         last-idx (dec len)]
     (cond
-      (> end last-idx) last-idx
-      (< end 0) (+ len end)
-      :else end)))
+      (> stop last-idx) last-idx
+      (< stop 0) (+ len stop)
+      :else stop)))
 
 (defn indices-for
   "Normalize user-specified indices into a range of positive indices
    It is up to the user to check for additional error cases as necessary"
-  [xs start end]
+  [xs start stop]
   (let [last-idx (dec (count xs))
         start' (normalized-start-idx xs start)
-        end' (normalized-end-idx xs end)]
-    (range start' (inc end'))))
+        stop' (normalized-stop-idx xs stop)]
+    (range start' (inc stop'))))

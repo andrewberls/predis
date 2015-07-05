@@ -148,7 +148,7 @@
          start' (util.range/normalized-start-idx s start)
          stop' (cond
                  (> stop last-idx) last-idx
-                 (< stop (- len)) 0 ; Only difference from normalized-end-idx
+                 (< stop (- len)) 0 ; Only difference from normalized-stop-idx
                  (< stop 0) (+ len stop)
                  :else stop)]
       (if (or (empty? s) (> start last-idx) (> start' stop'))
@@ -294,7 +294,7 @@
   (core/lindex [this k idx]
     (let [vs (vec (core/get this k))
           last-idx (dec (count vs))
-          idx' (util.range/normalized-end-idx vs idx)]
+          idx' (util.range/normalized-stop-idx vs idx)]
       ; Differ from lrange here
       (when (<= idx last-idx)
         (get vs idx'))))
@@ -339,11 +339,11 @@
         (core/lpush this k v)
         (core/llen this k))))
 
-  (core/lrange [this k start end]
+  (core/lrange [this k start stop]
     (let [vs (vec (core/get this k))]
       (if (or (empty? vs) (> start (dec (count vs))))
         []
-        (->> (util.range/indices-for vs start end)
+        (->> (util.range/indices-for vs start stop)
              (map (partial get vs))))))
 
   (core/lrem [this k cnt v]
@@ -378,7 +378,7 @@
 
   (core/lset [this k idx v]
     (let [vs (vec (core/get this k))
-          idx' (util.range/normalized-end-idx vs idx)
+          idx' (util.range/normalized-stop-idx vs idx)
           vs' (assoc vs idx' v)]
       (assert (< idx' (count vs)) err-indexrange)
       (swap! store assoc k vs')
@@ -516,14 +516,14 @@
   ;;(zinterstore [this dest numkeys ks weights])
   ;;(zlexcount [this k min-val max-val])
 
-  (core/zrange [this k start end]
-    (core/zrange this k start end {}))
+  (core/zrange [this k start stop]
+    (core/zrange this k start stop {}))
 
-  (core/zrange [this k start end {:keys [withscores]}]
+  (core/zrange [this k start stop {:keys [withscores]}]
     (let [zset (vec (util.zset/sort-zset (zset-at this k)))]
       (if (or (empty? zset) (> start (dec (count zset))))
         []
-        (let [tups (->> (util.range/indices-for zset start end)
+        (let [tups (->> (util.range/indices-for zset start stop)
                         (map (partial get zset))
                         (map util/stringify-tuple))]
           (util.zset/zset-response tups withscores)))))
