@@ -175,6 +175,9 @@
   (core/rpop [this k]
     (car/wcar config (car/rpop k)))
 
+  (core/rpoplpush [this src dest]
+    (car/wcar config (car/rpoplpush src dest)))
+
   (core/rpush [this k v-or-vs]
     (car/wcar config (apply car/rpush k (util/vec-wrap v-or-vs))))
 

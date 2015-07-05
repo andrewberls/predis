@@ -135,6 +135,25 @@
              (r/rpop carmine-client fake-key)))
       (test-utils/dbs-equal mock-client carmine-client))))
 
+(defspec test-rpoplpush
+  test-utils/nruns
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [vs (gen/not-empty (gen/vector gen/int))]
+      (let [src (str (java.util.UUID/randomUUID))
+            dest (str (java.util.UUID/randomUUID))
+
+            empty-src (str (java.util.UUID/randomUUID))
+            empty-dest (str (java.util.UUID/randomUUID))]
+        (test-utils/assert-rpush mock-client carmine-client src vs)
+        (is (= (r/rpoplpush mock-client src dest) (r/rpoplpush carmine-client src dest)))
+
+        (is (= (r/rpoplpush mock-client empty-src dest)
+               (r/rpoplpush carmine-client empty-src dest)))
+
+        (is (= (r/rpoplpush mock-client src empty-dest)
+               (r/rpoplpush carmine-client src empty-dest)))
+        (test-utils/dbs-equal mock-client carmine-client)))))
+
 (defspec test-rpush
   test-utils/nruns
   (let [mock-client (mock/->redis)]

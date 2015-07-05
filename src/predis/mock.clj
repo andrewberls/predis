@@ -376,6 +376,13 @@
           (replace-seq store k vs')
           v))))
 
+  (core/rpoplpush [this src dest]
+    (when-let [vs (seq (core/get this src))]
+      (let [v (last vs)]
+        (replace-seq store src (butlast vs))
+        (core/rpush this dest v)
+        v)))
+
   (core/lset [this k idx v]
     (let [vs (vec (core/get this k))
           idx' (util.range/normalized-stop-idx vs idx)
