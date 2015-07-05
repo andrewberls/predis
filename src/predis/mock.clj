@@ -30,7 +30,7 @@
 
 ; Need to distinguish types internally, both represented
 ; with Clojure maps
-(def empty-zset (with-meta {} {:predis/type "zset"}))
+(def empty-zset (with-meta {} {:predis/type "zset"})) ; member -> score
 (def empty-hash (with-meta {} {:predis/type "hash"}))
 
 (defn- set-at [redis k]
@@ -548,11 +548,10 @@
       (util.zset/zset-response tups withscores)))
 
   (zrank [this k m]
-    (let [zset (zset-at this k)]
-      (when (seq zset)
-        (let [vs (->> (util.zset/sort-zset zset)
-                      (mapv first))]
-          (.indexOf vs m)))))
+    (when-let [zset (seq (zset-at this k))]
+      (let [vs (->> (util.zset/sort-zset zset)
+                    (mapv first))]
+        (.indexOf vs m))))
 
   ;(zrem [this k m-or-ms])
   ;;(zremrangebylex [this k min-val max-val])
@@ -560,7 +559,12 @@
   ;(zrevrange [this k start stop] [this k start stop opts])
   ;(zrevrangebyscore [this k max-score min-score opts])
   ;(zrevrank [this k m])
-  ;(zscore [this k m])
+
+  (zscore [this k m]
+    (let [zset (zset-at this k)]
+      (when-let [score (get zset m)]
+        (str score))))
+
   ;(zunionstore [dest numkeys ks weights])
   ;;(zscan [this k cursor] [this k cursor opts])
   )

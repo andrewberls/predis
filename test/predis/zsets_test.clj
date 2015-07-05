@@ -126,6 +126,18 @@
 ;(zrevrange [this k start stop] [this k start stop opts])
 ;(zrevrangebyscore [this k max-score min-score opts])
 ;(zrevrank [this k m])
-;(zscore [this k m])
+
+(defspec test-zscore
+  test-utils/nruns
+  (let [mock-client (mock/->redis)]
+    (prop/for-all [k gen/string-alphanumeric
+                   kvs test-utils/gen-kvs-vec]
+      (test-utils/assert-zadd mock-client carmine-client k kvs)
+      (let [m (second (first (shuffle kvs)))]
+        (is (= (r/zscore mock-client k m) (r/zscore carmine-client k m)))
+        (is (= (r/zscore mock-client k "fake-m") (r/zscore carmine-client k "fake-m")))
+        (is (= (r/zscore mock-client "fake-k" m) (r/zscore carmine-client "fake-k" m)))
+        (test-utils/dbs-equal mock-client carmine-client)))))
+
 ;(zunionstore [dest numkeys ks weights])
 ;;(zscan [this k cursor] [this k cursor opts])

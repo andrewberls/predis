@@ -278,7 +278,10 @@
   ;(zrevrange [this k start stop] [this k start stop opts])
   ;(zrevrangebyscore [this k max-score min-score opts])
   ;(zrevrank [this k m])
-  ;(zscore [this k m])
+
+  (zscore [this k m]
+    (car/wcar config (car/zscore k m)))
+
   ;(zunionstore [dest numkeys ks weights])
   ;;(zscan [this k cursor] [this k cursor opts])
   )
