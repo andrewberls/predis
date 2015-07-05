@@ -566,7 +566,19 @@
 
   ;;(zremrangebylex [this k min-val max-val])
   ;(zremrangebyscore [this k min-score max-score])
-  ;(zrevrange [this k start stop] [this k start stop opts])
+
+  (core/zrevrange [this k start stop]
+    (core/zrevrange this k start stop {}))
+
+  (core/zrevrange [this k start stop {:keys [withscores]}]
+    (let [zset (vec (reverse (util.zset/sort-zset (zset-at this k))))]
+      (if (or (empty? zset) (> start (dec (count zset))))
+        []
+        (let [tups (->> (util.range/indices-for zset start stop)
+                        (map (partial get zset))
+                        (map util/stringify-tuple))]
+          (util.zset/zset-response tups withscores)))))
+
   ;(zrevrangebyscore [this k max-score min-score opts])
 
   (zrevrank [this k m]

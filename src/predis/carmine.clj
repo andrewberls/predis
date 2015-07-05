@@ -277,7 +277,15 @@
 
   ;;(zremrangebylex [this k min-val max-val])
   ;(zremrangebyscore [this k min-score max-score])
-  ;(zrevrange [this k start stop] [this k start stop opts])
+
+  (zrevrange [this k start stop]
+    (core/zrevrange this k start stop {}))
+
+  (zrevrange [this k start stop {:keys [withscores]}]
+    (if withscores
+      (car/wcar config (car/zrevrange k start stop "WITHSCORES"))
+      (car/wcar config (car/zrevrange k start stop))))
+
   ;(zrevrangebyscore [this k max-score min-score opts])
 
   (zrevrank [this k m]

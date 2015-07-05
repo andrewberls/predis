@@ -137,7 +137,7 @@
   (zrem [this k m-or-ms])
   ;;(zremrangebylex [this k min-val max-val])
   ;(zremrangebyscore [this k min-score max-score])
-  ;(zrevrange [this k start stop] [this k start stop opts])
+  (zrevrange [this k start stop] [this k start stop opts])
   ;(zrevrangebyscore [this k max-score min-score opts])
   (zrevrank [this k m])
   (zscore [this k m])
