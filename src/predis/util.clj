@@ -97,3 +97,10 @@
                         [(conj xs' el) nremoved]))
         init [[] 0]]
     (reduce counting-remove init xs)))
+
+(defn to-vec [coll]
+  "Return a vector of the given collection,
+  NOT creating a new one, unlike `vec`."
+  (if (vector? coll)
+    coll
+    (vec coll)))

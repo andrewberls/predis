@@ -393,7 +393,7 @@
 
   (core/rpush [this k v-or-vs]
     (let [vs' (util/vec-wrap v-or-vs)
-          do-push (fn [old-vs] (apply conj (vec old-vs) (map str vs')))]
+          do-push (fn [old-vs] (apply conj (util/to-vec old-vs) (map str vs')))]
       (swap! store update-in [k] do-push)
       (core/llen this k)))
 
