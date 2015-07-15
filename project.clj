@@ -1,4 +1,4 @@
-(defproject com.andrewberls/predis "0.1.5"
+(defproject com.andrewberls/predis "0.1.6"
   :description "An in-memory Redis mock for Clojure"
   :url "https://github.com/andrewberls/predis"
   :license {:name "MIT License"
