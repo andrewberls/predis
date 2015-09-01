@@ -116,9 +116,11 @@
 (defspec test-ltrim
   test-utils/nruns
   (let [mock-client (mock/->redis)]
-    (prop/for-all [k (gen/not-empty (gen/vector gen/int))
-                   start gen/int
-                   stop gen/int]
+    (prop/for-all [k gen/string-alphanumeric
+                   vs (gen/not-empty (gen/vector gen/int))
+                   start gen/pos-int
+                   stop gen/pos-int]
+      (test-utils/assert-rpush mock-client carmine-client k vs)
       (is (= (r/ltrim mock-client k start stop)
              (r/ltrim carmine-client k start stop)))
       (test-utils/dbs-equal mock-client carmine-client))))
