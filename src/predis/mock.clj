@@ -343,8 +343,12 @@
     (let [vs (vec (core/get this k))]
       (if (or (empty? vs) (> start (dec (count vs))))
         []
-        (->> (util.range/indices-for vs start stop)
-             (map (partial get vs))))))
+        (let [start' (util.range/normalized-start-idx vs start)
+              stop' (util.range/normalized-stop-idx vs stop)
+              indices (if (= start' stop')
+                        [start']
+                        (range start' (inc stop')))]
+          (map (partial get vs) indices)))))
 
   (core/lrem [this k cnt v]
     (assert (number? cnt) err-badint)
@@ -360,13 +364,18 @@
         0)))
 
   (core/ltrim [this k start stop]
-    (if (> start stop)
-      []
-      (when-let [vs (seq (core/get this k))]
-        (let [[start' stop'] (util.range/indices-for vs start stop)
-              vs' (subvec vs start' (inc stop'))]
-      (swap! store assoc k vs'))))
-    "OK")
+    ; Lots of tricky boundary cases here. See http://redis.io/commands/ltrim
+    (if (and (>= start 0) (>= stop 0) (> start stop))
+      (swap! store dissoc k)
+      (let [vs (vec (core/get this k))]
+        (when (seq vs)
+          (if (> start (count vs))
+            (swap! store dissoc k)
+            (let [start' (util.range/normalized-start-idx vs start)
+                  stop' (util.range/normalized-stop-idx vs stop)
+                  vs' (subvec vs start' (inc stop'))]
+              (replace-seq store k vs'))))))
+      "OK")
 
   (core/rpop [this k]
     (let [vs (core/get this k)]
